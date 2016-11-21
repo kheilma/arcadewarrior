@@ -4,8 +4,8 @@
 // node.js starter application for Bluemix
 //------------------------------------------------------------------------------
 
-
-
+/*
+Old file
 // This application uses express as its web server
 // for more info, see: http://expressjs.com
 var express = require('express');
@@ -29,7 +29,7 @@ var appEnv = cfenv.getAppEnv();
   // print a message when the server starts listening
   console.log("server starting on " + appEnv.url);
 });*/
-
+/*
 server.listen(appEnv.port, '0.0.0.0');
 console.log("Server started on " + appEnv.url );
 
@@ -127,4 +127,4 @@ setInterval(function(){
     socket.emit('newPosition', dataPackage);
   }
 
-}, 1000/25);
+}, 1000/25);*/
