@@ -105,11 +105,8 @@ io.sockets.on('connection', function(socket){
     for(var i in ROOM_LIST){
       // If there are no people in the game
       // You have found a room to join
-      
-      
       if(io.sockets.adapter.rooms[ROOM_LIST[i]] != undefined){
         var numClients = io.sockets.adapter.rooms[ROOM_LIST[i]].length;
-        console.log("Room: " + ROOM_LIST[i] + " has " + numClients + " people in it.");
 
         if(numClients>=2){
           // do nothing
@@ -123,10 +120,9 @@ io.sockets.on('connection', function(socket){
           break;
       }
     }
-    console.log("Room to join is: " + roomToJoin);
+
     // If no rooms are suitable, join room1
     if(roomToJoin==undefined){
-      console.log("SETTING ROOM TO JOIN");
       roomToJoin = 'room1';
     }
 
@@ -152,7 +148,6 @@ io.sockets.on('connection', function(socket){
   // Updates the player position on server
   socket.on('keyPress', function(data){
     if(data.inputId === 'left'){
-      console.log("yo");
       player.pressingLeft = data.state;
     } else if(data.inputId === 'right'){
       player.pressingRight = data.state;
@@ -181,7 +176,6 @@ setInterval(function(){
     var socketIDs = [];
     for (var socketId in io.sockets.adapter.rooms[room].sockets) {
       socketIDs.push(socketId);
-      //console.log("UserID:" + socketId);
     }
 
     //If there are people actually in the room
@@ -213,27 +207,5 @@ setInterval(function(){
       }
   }
 
-
-
-/*
-// For every client in the SOCKET_LIST
-// Increment position, add the new data to package
-// Adds their: x,y position, and their unique number
-  for(var i in PLAYER_LIST){
-    var player = PLAYER_LIST[i];
-    player.updatePos();
-    dataPackage.push({
-      x:player.x,
-      y:player.y,
-      number:player.number
-    });
-  }
-
-// After the data package has been updated, send it to the client
-  for(var i in SOCKET_LIST){
-    var socket = SOCKET_LIST[i];
-    socket.emit('newPosition', dataPackage);
-  }
-*/
   }
 }, 1000/25);
