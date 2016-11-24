@@ -66,7 +66,6 @@ var Player = function(id){
       self.x += self.maxSpeed;
     }
     if(self.pressingLeft){
-      console.log("plz");
       self.x -= self.maxSpeed;
     }
     if(self.pressingUp){
