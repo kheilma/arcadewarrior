@@ -56,7 +56,6 @@
   document.onkeydown = function(event){
     if(event.keyCode === 68){
       // D key
-      console.log("wutaDSF");
       socket.emit('keyPress', {inputId:'right', state:true});
     } else if(event.keyCode === 83){
       // S key

@@ -37,6 +37,15 @@ console.log("Server started on " + appEnv.url );
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 
+// List of rooms 
+var ROOM_LIST = ["room1", "room2", "room3"];
+
+// Queue for matchmaking
+var queue = [];
+
+//Number of connections
+var numOfConnections = 0;
+
 var Player = function(id){
   // Basically a constructor
   var self = {
@@ -57,6 +66,7 @@ var Player = function(id){
       self.x += self.maxSpeed;
     }
     if(self.pressingLeft){
+      console.log("plz");
       self.x -= self.maxSpeed;
     }
     if(self.pressingUp){
@@ -74,24 +84,75 @@ var io = require('socket.io')(server, {});
 // When a client connects, set id to random number, set x and y to 0, give unique number
 // And update the socket list
 io.sockets.on('connection', function(socket){
+  numOfConnections++;
   socket.id = Math.random();
   SOCKET_LIST[socket.id] = socket;
 
   var player = Player(socket.id);
   PLAYER_LIST[socket.id]=player;
 
-  console.log('Socket connection.');
+  queue.push(player);
+  console.log("Queue size after connection: " + queue.length);
+
+  // Take two players out of the queue, add them to a room
+  if(queue.length>=2){
+
+    var player1 = queue.shift();
+    var player2 = queue.shift();
+
+    var roomToJoin;
+    // Check to see if rooms are open here (todo)
+    for(var i in ROOM_LIST){
+      // If there are no people in the game
+      // You have found a room to join
+      
+      
+      if(io.sockets.adapter.rooms[ROOM_LIST[i]] != undefined){
+        var numClients = io.sockets.adapter.rooms[ROOM_LIST[i]].length;
+        console.log("Room: " + ROOM_LIST[i] + " has " + numClients + " people in it.");
+
+        if(numClients>=2){
+          // do nothing
+        } else {
+          roomToJoin = ROOM_LIST[i];
+          break;
+        }
+
+      } else {
+        roomToJoin = ROOM_LIST[i];
+          break;
+      }
+    }
+    console.log("Room to join is: " + roomToJoin);
+    // If no rooms are suitable, join room1
+    if(roomToJoin==undefined){
+      console.log("SETTING ROOM TO JOIN");
+      roomToJoin = 'room1';
+    }
+
+    // Convert player socketid into a socket
+    p1Socket = SOCKET_LIST[player1.id];
+    p2Socket = SOCKET_LIST[player2.id];
+
+    p1Socket.join(roomToJoin);
+    p2Socket.join(roomToJoin);
+    console.log("Joined room: " + roomToJoin);
+  }
 
   // When a player disconnects, remove them from the socket list
   socket.on('disconnect', function(){
     delete SOCKET_LIST[socket.id];
     delete PLAYER_LIST[socket.id];
+    var index = queue.indexOf(socket.id);
+    queue.splice(index,1);
+    numOfConnections--;
   });
 
   // Listens for client 'keyPress'
   // Updates the player position on server
   socket.on('keyPress', function(data){
     if(data.inputId === 'left'){
+      console.log("yo");
       player.pressingLeft = data.state;
     } else if(data.inputId === 'right'){
       player.pressingRight = data.state;
@@ -108,6 +169,53 @@ io.sockets.on('connection', function(socket){
 // Do stuff in function, every x amount of time
 setInterval(function(){
   var dataPackage = [];
+
+  for(var i in ROOM_LIST){
+    //Get all clients in a room
+    room = ROOM_LIST[i];
+
+    if(io.sockets.adapter.rooms[room] == undefined){
+      break;
+    }
+
+    var socketIDs = [];
+    for (var socketId in io.sockets.adapter.rooms[room].sockets) {
+      socketIDs.push(socketId);
+      //console.log("UserID:" + socketId);
+    }
+
+    //If there are people actually in the room
+    if(socketIDs.length>0){
+
+      // Create list of players based off of the socket IDS
+      var players = [];
+      players.push(PLAYER_LIST[socketIDs[0]]);
+      players.push(PLAYER_LIST[socketIDs[1]]);
+
+      // Loop through each client
+      for(var i in players){
+        var player = players[i];
+        player.updatePos();
+        if(player != undefined){
+          dataPackage.push({
+          x:player.x,
+          y:player.y,
+          number:player.number
+        });
+        }
+      }
+
+      for(var i in players){
+        if(players[i] != undefined){
+          var socket = SOCKET_LIST[players[i].id];
+          socket.emit('newPosition', dataPackage);
+        }
+      }
+  }
+
+
+
+/*
 // For every client in the SOCKET_LIST
 // Increment position, add the new data to package
 // Adds their: x,y position, and their unique number
@@ -126,5 +234,6 @@ setInterval(function(){
     var socket = SOCKET_LIST[i];
     socket.emit('newPosition', dataPackage);
   }
-
+*/
+  }
 }, 1000/25);
