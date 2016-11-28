@@ -41,7 +41,7 @@
   ctx.font = '30px Arial';
 
   // Creats socket connection to server
-  var socket = io();
+  var socket = io.connect();
 
   // Draws client
   socket.on('newPosition', function(data){

@@ -49,9 +49,10 @@ var numOfConnections = 0;
 var Player = function(id){
   // Basically a constructor
   var self = {
-    x:250,
-    y:250,
+    x:Math.floor(Math.random() * 250) + 30,
+    y:Math.floor(Math.random() * 250) + 30,
     id:id,
+    room:"no room",
     number:"" + Math.floor(10 * Math.random()),
     pressingRight:false,
     pressingLeft:false,
@@ -129,6 +130,9 @@ io.sockets.on('connection', function(socket){
     p1Socket = SOCKET_LIST[player1.id];
     p2Socket = SOCKET_LIST[player2.id];
 
+    player1.room = roomToJoin;
+    player2.room = roomToJoin;
+
     p1Socket.join(roomToJoin);
     p2Socket.join(roomToJoin);
     console.log("Joined room: " + roomToJoin);
@@ -136,8 +140,12 @@ io.sockets.on('connection', function(socket){
 
   // When a player disconnects, remove them from the socket list
   socket.on('disconnect', function(){
+    var temp = PLAYER_LIST[socket.id];
+    var room = temp.room;
+
     delete SOCKET_LIST[socket.id];
     delete PLAYER_LIST[socket.id];
+    socket.leave(room);
     var index = queue.indexOf(socket.id);
     queue.splice(index,1);
     numOfConnections--;
@@ -162,9 +170,10 @@ io.sockets.on('connection', function(socket){
 
 // Do stuff in function, every x amount of time
 setInterval(function(){
-  var dataPackage = [];
-
   for(var i in ROOM_LIST){
+
+    var dataPackage = [];
+
     //Get all clients in a room
     room = ROOM_LIST[i];
 
@@ -176,35 +185,35 @@ setInterval(function(){
     for (var socketId in io.sockets.adapter.rooms[room].sockets) {
       socketIDs.push(socketId);
     }
+    
+      //If there are people actually in the room
+      if(socketIDs.length>0){
 
-    //If there are people actually in the room
-    if(socketIDs.length>0){
+        // Create list of players based off of the socket IDS
+        var players = [];
+        players.push(PLAYER_LIST[socketIDs[0]]);
+        players.push(PLAYER_LIST[socketIDs[1]]);
 
-      // Create list of players based off of the socket IDS
-      var players = [];
-      players.push(PLAYER_LIST[socketIDs[0]]);
-      players.push(PLAYER_LIST[socketIDs[1]]);
-
-      // Loop through each client
-      for(var i in players){
-        var player = players[i];
-        player.updatePos();
-        if(player != undefined){
-          dataPackage.push({
-          x:player.x,
-          y:player.y,
-          number:player.number
-        });
+        // Loop through each client
+        for(var i in players){
+          var player = players[i];
+          if(player != undefined){
+            player.updatePos();
+            dataPackage.push({
+              x:player.x,
+              y:player.y,
+              number:player.number
+            });
+          }
         }
-      }
-
-      for(var i in players){
-        if(players[i] != undefined){
-          var socket = SOCKET_LIST[players[i].id];
-          socket.emit('newPosition', dataPackage);
+        
+        for(var i in players){
+          if(players[i] != undefined){
+            var socket = SOCKET_LIST[players[i].id];
+              socket.emit('newPosition', dataPackage);
+          }
         }
-      }
-  }
+    }
 
   }
 }, 1000/25);
