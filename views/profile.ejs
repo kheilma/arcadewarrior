@@ -1,4 +1,4 @@
-<canvas id="ctx" width = "500" height="500" style="border:1px solid #000000;"></canvas> 
+ <canvas id="ctx" width = "500" height="500" style="border:1px solid #000000;"></canvas> 
 
 <!-- 
   Import script for socket.io and starting communicating to server
@@ -7,10 +7,8 @@
 <script>
   var ctx = document.getElementById("ctx").getContext("2d");
   ctx.font = '30px Arial';
-
   // Creats socket connection to server
-  var socket = io();
-
+  var socket = io.connect();
   // Draws client
   socket.on('newPosition', function(data){
     ctx.clearRect(0,0,500,500);
@@ -19,12 +17,10 @@
     }
     
   });
-
   // Detects key presses
   document.onkeydown = function(event){
     if(event.keyCode === 68){
       // D key
-      console.log("wutaDSF");
       socket.emit('keyPress', {inputId:'right', state:true});
     } else if(event.keyCode === 83){
       // S key
@@ -36,9 +32,7 @@
       // W key
       socket.emit('keyPress', {inputId:'up', state:true});
     }
-
   }
-
   // Detects when keys are not pressed
   document.onkeyup = function(event){
     if(event.keyCode === 68){
@@ -56,5 +50,4 @@
     }
   }
 
-
-</script>
+  </script>
