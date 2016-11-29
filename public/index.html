@@ -37,11 +37,14 @@
   !--> 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-  var ctx = document.getElementById("ctx").getContext("2d");
-  ctx.font = '30px Arial';
+  
 
   // Creats socket connection to server
   var socket = io();
+
+  // Game!
+  var ctx = document.getElementById("ctx").getContext("2d");
+  ctx.font = '30px Arial';
 
   // Draws client
   socket.on('newPosition', function(data){
@@ -49,8 +52,8 @@
     for(var i = 0; i < data.length; i++){
       ctx.fillText(data[i].number,data[i].x,data[i].y);
     }
-    
   });
+  
 
   // Detects key presses
   document.onkeydown = function(event){
