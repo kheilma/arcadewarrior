@@ -40,6 +40,10 @@ module.exports = function(app, passport) {
 		req.logout();
 		res.redirect('/');
 	});
+
+	app.get('/game', function(req, res) {
+		res.render('game.ejs', {});
+	});
 };
 
 
