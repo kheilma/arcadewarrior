@@ -38,7 +38,7 @@ var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 
 // List of rooms 
-var ROOM_LIST = ["room1", "room2", "room3"];
+var ROOM_LIST = ["room1"];
 
 // Queue for matchmaking
 var queue = [];
@@ -111,19 +111,43 @@ io.sockets.on('connection', function(socket){
         if(numClients>=2){
           // do nothing
         } else {
-          roomToJoin = ROOM_LIST[i];
+          // If at the end of all possible rooms, possibly add new room
+          if(i == ROOM_LIST.length){
+            var newRoomName = 'room' + (ROOM_LIST.length+1);
+            // If the new room to be made is already in the list, don't create it\
+            if(ROOM_LIST.indexOf(newRoomName) < 0){
+              ROOM_LIST.push(newRoomName);
+            }
+            roomToJoin = newRoomName;
+          } else {
+            roomToJoin = ROOM_LIST[i];
+          }
           break;
         }
 
       } else {
-        roomToJoin = ROOM_LIST[i];
-          break;
+        // If at the end of all possible rooms, possibly add new room
+        if(i == ROOM_LIST.length){
+            var newRoomName = 'room' + (ROOM_LIST.length+1);
+            // If the new room to be made is already in the list, don't create it\
+            if(ROOM_LIST.indexOf(newRoomName) < 0){
+              ROOM_LIST.push(newRoomName);
+            }
+            roomToJoin = newRoomName;
+          } else {
+            roomToJoin = ROOM_LIST[i];
+        }
+        break;
       }
     }
 
     // If no rooms are suitable, join room1
     if(roomToJoin==undefined){
-      roomToJoin = 'room1';
+      var newRoomName = 'room' + (ROOM_LIST.length+1);
+      if(ROOM_LIST.indexOf(newRoomName) < 0){
+        ROOM_LIST.push(newRoomName);
+      }
+      roomToJoin = newRoomName;
     }
 
     // Convert player socketid into a socket
