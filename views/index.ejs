@@ -37,6 +37,10 @@
   // Creats socket connection to server
   var socket = io.connect();
 
+  var uniqueId = Math.random();
+
+  socket.emit('id', {id:uniqueId});
+
   // Do this stuff when in queue
   socket.on('queue', function(){
   
@@ -45,25 +49,47 @@
   });
 
   // Do this stuff while waiting for both players to be ready
-  socket.on('waiting', function(){
+  socket.on('waiting', function(data){
 
     console.log("I'm waiting!");
   
   });
 
-  // Draws client
+  // Drawing related things
+
+  socket.on('playerLeft', function(){
+    ctx.clearRect(0,0,800,600);
+    ctx.fillText("Other player has left. Sorry.",100,300);
+  });
+
+  socket.on('clearScreen', function(){
+
+    ctx.clearRect(0,0,800,600);
+
+  });
+
   socket.on('newPosition', function(data){
     ctx.clearRect(0,0,800,600);
     for(var i = 0; i < data.length; i++){
-      ctx.fillText(data[i].number,data[i].x,data[i].y);
+      //ctx.fillText(data[i].number,data[i].x,data[i].y);
+      var img = new Image();
+      if(data[i].uniqueId === uniqueId){
+        img.src = "p1.png";
+      } else {
+        img.src = "p2.png";
+      }
+      // Draw image in center
+      ctx.drawImage(img,data[i].x-16,data[i].y-16);
+      
   }
     
   });
   // Detects key presses
   document.onkeydown = function(event){
     if(event.keyCode === 68){
+    //socket.emit('debug', "Pressing D");
+    socket.emit('keyPress', {inputId:'right', state:true});
       // D key
-      socket.emit('keyPress', {inputId:'right', state:true});
     } else if(event.keyCode === 83){
       // S key
       socket.emit('keyPress', {inputId:'down', state:true});

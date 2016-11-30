@@ -40,7 +40,7 @@
   
 
   // Creats socket connection to server
-  var socket = io();
+  var socket = io.connect();
 
   // Game!
   var ctx = document.getElementById("ctx").getContext("2d");
@@ -59,7 +59,6 @@
   document.onkeydown = function(event){
     if(event.keyCode === 68){
       // D key
-      console.log("wutaDSF");
       socket.emit('keyPress', {inputId:'right', state:true});
     } else if(event.keyCode === 83){
       // S key

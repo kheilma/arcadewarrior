@@ -92,6 +92,7 @@ var Player = function(id){
   self.maxSpeed = 10;
   self.room = "no room";
   self.ready = false;
+  self.uniqueId = -1;
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -167,7 +168,8 @@ Player.update = function(players){
       dataPackage.push({
         x:player.x,
         y:player.y,
-        number:player.number
+        number:player.number,
+        uniqueId:player.uniqueId,
       });
     }
   }
@@ -182,9 +184,20 @@ io.sockets.on('connection', function(socket){
   numOfConnections++;
   socket.id = Math.random();
   SOCKET_LIST[socket.id] = socket;
-
+  
   var player = Player(socket.id);
-  //PLAYER_LIST[socket.id]=player;
+
+  socket.on('id', function(data){
+
+    player.uniqueId = data.id;
+
+  });
+
+  socket.on('debug', function(message){
+
+    console.log("From client: " + message);
+
+  });
 
   queue.push(player);
   console.log("Queue size after connection: " + queue.length);
@@ -192,10 +205,7 @@ io.sockets.on('connection', function(socket){
 
   // Take two players out of the queue, add them to a room
   if(queue.length>=2){
-
     handleRoom(queue);
-    socket.emit('waiting');
-    
   }
 
   Player.onConnect(socket);
@@ -212,6 +222,7 @@ io.sockets.on('connection', function(socket){
 
     // Force socket to leave the room it was connected to
     socket.leave(room);
+    socket.emit('clearScreen');
 
     // Remove it from the queue if it was in it
     var index = queue.indexOf(socket.id);
@@ -226,24 +237,20 @@ io.sockets.on('connection', function(socket){
 
 });
 
-io.sockets.on('testing', function(){
-
-  console.log("It Works!");
-
-});
+var startGame = false;
 
 // Do stuff in function, every x amount of time
 setInterval(function(){
   // Loop through all rooms
 
   for(var i in ROOM_LIST){
-
+    
     // Create empty data package
     var dataPackage = [];
 
     //Get all clients in a room
     room = ROOM_LIST[i];
-
+    //console.log(room);
     // If the room does not exist, stop
     if(io.sockets.adapter.rooms[room] == undefined){
       break;
@@ -255,13 +262,16 @@ setInterval(function(){
       socketIDs.push(socketId);
     }
     
-    //If there are people actually in the room
-    if(socketIDs.length>1){
+    // Create list of players based off of the socket IDS
+    
 
-      // Create list of players based off of the socket IDS
-      var players = [];
-      var player1 = Player.list[socketIDs[0]];
-      var player2 = Player.list[socketIDs[1]];
+    //If there are people actually in the room
+    if(socketIDs.length==2){
+      
+    var players = [];
+    var player1 = Player.list[socketIDs[0]];
+    var player2 = Player.list[socketIDs[1]];
+
       players.push(player1);
       players.push(player2);
 
@@ -284,6 +294,21 @@ setInterval(function(){
 
       }
 
+      // Closes socketIDs if statement
+    } else {
+      var p1Socket = SOCKET_LIST[socketIDs[0]];
+      var p2Socket = SOCKET_LIST[socketIDs[1]];
+      // If there are not 2 people in the room, AKA someone left. Tell remaining client
+      // That the other person left and stop the game
+
+      // If player1 undefined, send player2 the message that player1 left
+      if(p1Socket == undefined){
+        p2Socket.emit('playerLeft');
+      // Vice versa
+      } else {
+        p1Socket.emit('playerLeft');
+      }
+
     }
 
   }
@@ -294,6 +319,20 @@ handleRoom = function(queue){
     var player1 = queue.shift();
     var player2 = queue.shift();
 
+    // Convert player socketid into a socket
+    p1Socket = SOCKET_LIST[player1.id];
+    p2Socket = SOCKET_LIST[player2.id];
+
+    // If a socket randomly drops for some reason.
+    // Ex: refreshing while in queue
+    if(p1Socket === undefined){
+      queue.push(player2);
+      return;
+    } else if(p2Socket === undefined){
+      queue.push(player1);
+      return;
+    }
+
     var roomToJoin;
     // Check to see if rooms are open here (todo)
     for(var i in ROOM_LIST){
@@ -302,7 +341,7 @@ handleRoom = function(queue){
       if(io.sockets.adapter.rooms[ROOM_LIST[i]] != undefined){
         var numClients = io.sockets.adapter.rooms[ROOM_LIST[i]].length;
 
-        if(numClients>=2){
+        if(numClients>=1){
           // do nothing
         } else {
           // If at the end of all possible rooms, possibly add new room
@@ -343,10 +382,6 @@ handleRoom = function(queue){
       }
       roomToJoin = newRoomName;
     }
-
-    // Convert player socketid into a socket
-    p1Socket = SOCKET_LIST[player1.id];
-    p2Socket = SOCKET_LIST[player2.id];
 
     player1.room = roomToJoin;
     player2.room = roomToJoin;
