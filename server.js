@@ -92,6 +92,7 @@ var Player = function(id){
   self.maxSpeed = 10;
   self.room = "no room";
   self.ready = false;
+  self.uniqueId = -1;
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -167,7 +168,8 @@ Player.update = function(players){
       dataPackage.push({
         x:player.x,
         y:player.y,
-        number:player.number
+        number:player.number,
+        uniqueId:player.uniqueId,
       });
     }
   }
@@ -182,9 +184,14 @@ io.sockets.on('connection', function(socket){
   numOfConnections++;
   socket.id = Math.random();
   SOCKET_LIST[socket.id] = socket;
-
+  
   var player = Player(socket.id);
-  //PLAYER_LIST[socket.id]=player;
+
+  socket.on('id', function(data){
+
+    player.uniqueId = data.id;
+
+  });
 
   queue.push(player);
   console.log("Queue size after connection: " + queue.length);
@@ -192,10 +199,7 @@ io.sockets.on('connection', function(socket){
 
   // Take two players out of the queue, add them to a room
   if(queue.length>=2){
-
     handleRoom(queue);
-    socket.emit('waiting');
-    
   }
 
   Player.onConnect(socket);
@@ -223,12 +227,6 @@ io.sockets.on('connection', function(socket){
   });
 
   
-
-});
-
-io.sockets.on('testing', function(){
-
-  console.log("It Works!");
 
 });
 
@@ -293,6 +291,9 @@ setInterval(function(){
 handleRoom = function(queue){
     var player1 = queue.shift();
     var player2 = queue.shift();
+
+    player1.isFirst = true;
+    player2.isFirst = false;
 
     var roomToJoin;
     // Check to see if rooms are open here (todo)
