@@ -265,6 +265,7 @@ setInterval(function(){
       players.push(player1);
       players.push(player2);
 
+      // If both players are ready
       if(player1.ready == true && player2.ready == true){
         // Get updated data from the players
         dataPackage = Player.update(players);
