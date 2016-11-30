@@ -91,6 +91,7 @@ var Player = function(id){
   self.pressingDown = false;
   self.maxSpeed = 10;
   self.room = "no room";
+  self.ready = false;
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -143,7 +144,10 @@ Player.onConnect = function(socket){
     } else if(data.inputId === 'down'){
       player.pressingDown = data.state;
     }
+  });
 
+  socket.on('ready', function(){
+    player.ready = true;
   });
 }
 
@@ -184,11 +188,13 @@ io.sockets.on('connection', function(socket){
 
   queue.push(player);
   console.log("Queue size after connection: " + queue.length);
+  socket.emit('queue');
 
   // Take two players out of the queue, add them to a room
   if(queue.length>=2){
 
     handleRoom(queue);
+    socket.emit('waiting');
     
   }
 
@@ -220,9 +226,16 @@ io.sockets.on('connection', function(socket){
 
 });
 
+io.sockets.on('testing', function(){
+
+  console.log("It Works!");
+
+});
+
 // Do stuff in function, every x amount of time
 setInterval(function(){
   // Loop through all rooms
+
   for(var i in ROOM_LIST){
 
     // Create empty data package
@@ -243,22 +256,31 @@ setInterval(function(){
     }
     
     //If there are people actually in the room
-    if(socketIDs.length>0){
+    if(socketIDs.length>1){
 
       // Create list of players based off of the socket IDS
       var players = [];
-      players.push(Player.list[socketIDs[0]]);
-      players.push(Player.list[socketIDs[1]]);
+      var player1 = Player.list[socketIDs[0]];
+      var player2 = Player.list[socketIDs[1]];
+      players.push(player1);
+      players.push(player2);
 
-      // Get updated data from the players
-      dataPackage = Player.update(players);
+      if(player1.ready == true && player2.ready == true){
+        // Get updated data from the players
+        dataPackage = Player.update(players);
       
-      // Send the data to the respective players
-      for(var i in players){
-        if(players[i] != undefined){
-          var socket = SOCKET_LIST[players[i].id];
-            socket.emit('newPosition', dataPackage);
+        // Send the data to the respective players
+        for(var i in players){
+          if(players[i] != undefined){
+            var socket = SOCKET_LIST[players[i].id];
+              socket.emit('newPosition', dataPackage);
+          }
         }
+      } else {
+
+        // Not ready.
+        //console.log(room + " has players that are not ready.");
+
       }
 
     }

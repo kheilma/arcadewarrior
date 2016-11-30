@@ -36,12 +36,27 @@
   ctx.font = '30px Arial';
   // Creats socket connection to server
   var socket = io.connect();
+
+  // Do this stuff when in queue
+  socket.on('queue', function(){
+  
+    console.log("In queue!");
+
+  });
+
+  // Do this stuff while waiting for both players to be ready
+  socket.on('waiting', function(){
+
+    console.log("I'm waiting!");
+  
+  });
+
   // Draws client
   socket.on('newPosition', function(data){
-    ctx.clearRect(0,0,500,500);
+    ctx.clearRect(0,0,800,600);
     for(var i = 0; i < data.length; i++){
       ctx.fillText(data[i].number,data[i].x,data[i].y);
-    }
+  }
     
   });
   // Detects key presses
@@ -58,6 +73,9 @@
     } else if(event.keyCode === 87){
       // W key
       socket.emit('keyPress', {inputId:'up', state:true});
+    } else if(event.keyCode === 32){
+      // Space key
+      socket.emit('ready');
     }
   }
   // Detects when keys are not pressed
@@ -74,6 +92,8 @@
     } else if(event.keyCode === 87){
       // W key
       socket.emit('keyPress', {inputId:'up', state:false});
+    } else if(event.keyCode === 32){
+      // Space key
     }
   }
 
