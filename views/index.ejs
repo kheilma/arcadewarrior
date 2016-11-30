@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+	<link rel="stylesheet" href="stylesheets/style.css" />
+</head>
+<body>
+<ul> 
+<li> <a href = "/login">Login</a></li>
+<li> <a href = "/profile">Profile</a></li>
+<li> <a href = "/signup">Sign Up</a></li>
+<li> <a href = "/game">Play</a></li>
+</ul>
+<div id = "centered">
+<img src="arcadewarrior3.png" style = "width:280px;height:280px;top:-200px;position:relative;" alt="AW"/>
+</div>
+
+</body>
+</html>
+
+<canvas id="ctx" width = "800" height="600" style="border:1px solid #000000; background-color : white;  padding-left: 0;
+    padding: 0;
+    margin: auto;
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;"></canvas> 
+
+<!-- 
+  Import script for socket.io and starting communicating to server
+  !--> 
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+  var ctx = document.getElementById("ctx").getContext("2d");
+  ctx.font = '30px Arial';
+  // Creats socket connection to server
+  var socket = io.connect();
+
+  // Do this stuff when in queue
+  socket.on('queue', function(){
+  
+    console.log("In queue!");
+
+  });
+
+  // Do this stuff while waiting for both players to be ready
+  socket.on('waiting', function(){
+
+    console.log("I'm waiting!");
+  
+  });
+
+  // Draws client
+  socket.on('newPosition', function(data){
+    ctx.clearRect(0,0,800,600);
+    for(var i = 0; i < data.length; i++){
+      ctx.fillText(data[i].number,data[i].x,data[i].y);
+  }
+    
+  });
+  // Detects key presses
+  document.onkeydown = function(event){
+    if(event.keyCode === 68){
+      // D key
+      socket.emit('keyPress', {inputId:'right', state:true});
+    } else if(event.keyCode === 83){
+      // S key
+      socket.emit('keyPress', {inputId:'down', state:true});
+    } else if(event.keyCode === 65){
+      // A key
+      socket.emit('keyPress', {inputId:'left', state:true});
+    } else if(event.keyCode === 87){
+      // W key
+      socket.emit('keyPress', {inputId:'up', state:true});
+    } else if(event.keyCode === 32){
+      // Space key
+      socket.emit('ready');
+    }
+  }
+  // Detects when keys are not pressed
+  document.onkeyup = function(event){
+    if(event.keyCode === 68){
+      // D key
+      socket.emit('keyPress', {inputId:'right', state:false});
+    } else if(event.keyCode === 83){
+      // S key
+      socket.emit('keyPress', {inputId:'down', state:false});
+    } else if(event.keyCode === 65){
+      // A key
+      socket.emit('keyPress', {inputId:'left', state:false});
+    } else if(event.keyCode === 87){
+      // W key
+      socket.emit('keyPress', {inputId:'up', state:false});
+    } else if(event.keyCode === 32){
+      // Space key
+    }
+  }
+
+  </script>
