@@ -55,7 +55,19 @@
   
   });
 
-  // Draws client
+  // Drawing related things
+
+  socket.on('playerLeft', function(){
+    ctx.clearRect(0,0,800,600);
+    ctx.fillText("Other player has left. Sorry.",100,300);
+  });
+
+  socket.on('clearScreen', function(){
+
+    ctx.clearRect(0,0,800,600);
+
+  });
+
   socket.on('newPosition', function(data){
     ctx.clearRect(0,0,800,600);
     for(var i = 0; i < data.length; i++){
@@ -75,8 +87,9 @@
   // Detects key presses
   document.onkeydown = function(event){
     if(event.keyCode === 68){
+    //socket.emit('debug', "Pressing D");
+    socket.emit('keyPress', {inputId:'right', state:true});
       // D key
-      socket.emit('keyPress', {inputId:'right', state:true});
     } else if(event.keyCode === 83){
       // S key
       socket.emit('keyPress', {inputId:'down', state:true});
