@@ -388,6 +388,7 @@ setInterval(function(){
           player2.startedGame = true;
         }
         dataPackage = Player.update(players);
+        handleCollisions(player1,player2);
       
         // Send the data to the respective players
         for(var i in players){
@@ -422,6 +423,40 @@ setInterval(function(){
 
   }
 }, 1000/50);
+
+handleCollisions = function(player1, player2){
+
+  if(player1.game == "BoxKick" || player2.game == "BoxKick"){
+      if(hitDetect(player1,player2)){
+
+        if(player1.y<player2.y){
+          // player1 wins
+          console.log("Player1 wins!!!!");
+        } else {
+          // player2 wins
+          console.log("Player1 wins!!!!");
+        }
+
+      }
+  }
+
+}
+
+hitDetect = function(player1, player2){
+
+  // Set x and y to the center of each box
+  var p1x = player1.x+32;
+  var p1y = player1.y+32;
+  var p2x = player2.x+32;
+  var p2y = player2.y+32;
+
+  if(p1x+32 >= p2x-32 && p1x-32 <= p2x+32 && p1y+32 >= p2y-32 && p1y-32 <= p2y+32){
+    return true;
+  }
+  
+  return false;
+
+}
 
 generateGameList = function(p1, p2){
 
