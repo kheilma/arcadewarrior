@@ -41,6 +41,7 @@
   var uniqueId = Math.random();
 
   var game = "none";
+
   var boxKickBG = new Image();
   boxKickBG.src = "bkbg.png";
 
@@ -69,8 +70,12 @@
 
   // Drawing related things
 
+  socket.on('pauseOn', function(data){
+    var message = data.winner + " won the minigame!";
+    ctx.fillText(message,200,300);
+  });
+
   socket.on('playerLeft', function(){
-    ctx.clearRect(0,0,800,600);
     ctx.fillText("Other player has left. Sorry.",100,300);
   });
 
