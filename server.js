@@ -401,9 +401,12 @@ setInterval(function(){
     //If there are people actually in the room
     if(socketIDs.length==2){
       
-    var players = [];
-    var player1 = Player.list[socketIDs[0]];
-    var player2 = Player.list[socketIDs[1]];
+      var players = [];
+      var player1 = Player.list[socketIDs[0]];
+      var player2 = Player.list[socketIDs[1]];
+
+      var p1Socket = SOCKET_LIST[socketIDs[0]];
+      var p2Socket = SOCKET_LIST[socketIDs[1]];
 
       players.push(player1);
       players.push(player2);
@@ -430,8 +433,7 @@ setInterval(function(){
         } else {
 
           // Game is paused!!!
-          var p1Socket = SOCKET_LIST[socketIDs[0]];
-          var p2Socket = SOCKET_LIST[socketIDs[1]];
+          
 
           // Customize message to each client
           var winner = player1.game.winner;
@@ -454,6 +456,8 @@ setInterval(function(){
 
         // Not ready.
         //console.log(room + " has players that are not ready.");
+        p1Socket.emit('waiting', {p1:player1.ready, p2:player2.ready});
+        p2Socket.emit('waiting', {p1:player2.ready, p2:player1.ready});
 
       }
 

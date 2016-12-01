@@ -57,15 +57,32 @@
   // Do this stuff when in queue
   socket.on('queue', function(){
   
-    console.log("In queue!");
+    //console.log("In queue!");
+    ctx.clearRect(0,0,800,600);
+    ctx.fillText("You are in queue.",150,100);
 
   });
 
   // Do this stuff while waiting for both players to be ready
   socket.on('waiting', function(data){
+    ctx.clearRect(0,0,800,600);
+    var p1Ready = data.p1;
+    var p2Ready = data.p2;
+    //console.log("I'm waiting!");
+    ctx.fillText("Press space to ready up.",200,100);
 
-    console.log("I'm waiting!");
-  
+    if(p1Ready == true && p2Ready == false){
+      ctx.fillText("You: ready",50,200);
+      ctx.fillText("Opponent: not ready",50,300);
+    } else if(p1Ready == false && p2Ready == false){
+      ctx.fillText("You: not ready",50,200);
+      ctx.fillText("Opponent: not ready",50,300);
+    } else if(p1Ready == false && p2Ready == true){
+      ctx.fillText("You: not ready",50,200);
+      ctx.fillText("Opponent: ready",50,300);
+    }
+    
+    
   });
 
   // Drawing related things
