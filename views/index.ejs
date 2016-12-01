@@ -31,6 +31,7 @@
   Import script for socket.io and starting communicating to server
   !--> 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
 <script>
   var ctx = document.getElementById("ctx").getContext("2d");
   ctx.font = '30px Arial';
@@ -80,7 +81,6 @@
       }
       // Draw image in center
       ctx.drawImage(img,data[i].x-16,data[i].y-16);
-      
   }
     
   });
@@ -124,3 +124,5 @@
   }
 
   </script>
+  <script src="js/Minigame.js"></script>
+  <script src="js/BoxKick.js"></script>
