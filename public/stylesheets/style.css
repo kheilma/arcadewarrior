@@ -5,8 +5,46 @@
 body,html {
 	background-color: #FFCC33;
 	margin:0;
+    display: block;
+    background-image: url("../background.png");
 }
-
+div {
+    display: block;
+}
+div#wrapper {
+    position: relative;
+    width: 1011px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-width: 0 1px 0 1px;
+    border-style: solid;
+    border-color: #ccc;
+    background-color: black;
+}
+div#container {
+    width: 975px;
+    text-align: left;
+    margin: 100px 17px 0 17px;
+    background-color: black;
+}
+div.arcadeHeader {
+    position: relative;
+    width: 1011px;
+    height: 91px;
+    margin: 0 auto;
+    text-align: left;
+    border-width: 0 1px 0 1px;
+    border-style: solid;
+    border-color: #ccc;
+}
+div.game_swf {
+    position: relative;
+    float: left;
+    margin-left: 10px;
+    width: 770px;
+    margin-top: -18px;
+    background-color: black;
+}
 
 #centered {
 	text-align: center;
