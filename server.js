@@ -56,6 +56,58 @@ var queue = [];
 //Number of connections
 var numOfConnections = 0;
 
+var Minigame = function(){
+  var self = {
+        type:"none",
+        time:30,
+        winner:"none",
+    }
+
+    self.startGame = function(){
+        // Default minigame has no definition to start
+    }
+
+    self.finish = function(){
+
+    }
+
+    return self;
+}
+
+var BoxKick = function(p1, p2){
+  var self = Minigame();
+  self.player1 = p1;
+  self.player2 = p2;
+  self.type = "BoxKick";
+  self.time = 30;
+
+  self.startGame = function(){
+    // Turn players into sockets for emitting
+    var p1Socket = SOCKET_LIST[self.player1.id];
+    var p2Socket = SOCKET_LIST[self.player2.id];
+
+    // Init player positions
+    self.player1.x = 100;
+    self.player1.y = 500;
+
+    self.player2.x = 700;
+    self.player2.y = 500;
+
+    // Tell client what game type to draw
+    p1Socket.emit('gameType', {type:self.type});
+    p2Socket.emit('gameType', {type:self.type});
+  }
+
+  self.finish = function(nextGame){
+    //Update score here....
+
+    // Start next game
+    nextGame.startGame();
+  }
+
+  return self;
+}
+
 // General entity super class.
 var entity = function(){
     var self = {
@@ -83,6 +135,7 @@ var entity = function(){
 
 var Player = function(id){
   var self = entity();
+  self.y
   self.id = id;
   self.number = "" + Math.floor(10 * Math.random());
   self.pressingRight = false;
@@ -90,9 +143,17 @@ var Player = function(id){
   self.pressingUp = false;
   self.pressingDown = false;
   self.maxSpeed = 10;
+
   self.room = "no room";
   self.ready = false;
   self.uniqueId = -1;
+
+  self.gameList = [];
+  self.game = "none";
+  self.startedGame = false;
+
+  self.jumping = false;
+  self.kicking = false;
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -100,25 +161,67 @@ var Player = function(id){
     self.updateSpd();
     super_update();
   }
-
+  
   // Handle keyboard inputs
   self.updateSpd = function(){
-    // right and left
-    if(self.pressingRight){
-      self.spdX = self.maxSpeed;
-    } else if(self.pressingLeft){
-      self.spdX = -self.maxSpeed;
-    } else {
-      self.spdX = 0;
-    }
+     // If not playing BoxKick
+    if(self.game!="BoxKick"){
+      // right and left
+      if(self.pressingRight){
+        self.spdX = self.maxSpeed;
+      } else if(self.pressingLeft){
+        self.spdX = -self.maxSpeed;
+      } else {
+        self.spdX = 0;
+      }
+    // up and down
+      if(self.pressingUp){
+        self.spdY = -self.maxSpeed;
+      } else if(self.pressingDown){
+        self.spdY = self.maxSpeed;
+      } else {
+        self.spdY = 0;
+      }
+    // If playing BoxKick
+    } else if(self.game=="BoxKick"){
+      
+      // NEED TO DO SOMETHING ABOUT GRAVITY
+      var grav = 1.2;
 
     // up and down
-    if(self.pressingUp){
-      self.spdY = -self.maxSpeed;
-    } else if(self.pressingDown){
-      self.spdY = self.maxSpeed;
-    } else {
-      self.spdY = 0;
+      if(self.pressingUp && self.jumping == false){
+        self.spdY = -25;
+        self.jumping = true;
+        self.kicking = false;
+      } else if(self.pressingDown && self.jumping == true){
+        self.spdY = 15;
+        self.spdX = 15;
+        self.jumping = false;
+        self.kicking = true;
+      }
+
+      // stop players from falling through the floor
+      if((self.y + self.spdY >= 500)){
+        self.y = 500;
+        self.spdY=0;
+        self.x+=self.spdX;
+        self.spdX=0;
+      }
+
+      // Primitive way of gravity
+
+      // If above the boundary, and they are not kicking, apply gravity
+      // And stop them from being able to jump
+      if(self.y < 500 && self.kicking == false){
+        self.spdY+=grav;
+        self.jumping = true;
+      // If they are above the boundary, and are kicking, don't apply gravity
+      } else if(self.y < 500 && self.kicking == true){
+        self.jumping = true;
+      } else if(self.y==500){
+        self.jumping = false;
+      }
+
     }
 
   }
@@ -278,6 +381,12 @@ setInterval(function(){
       // If both players are ready
       if(player1.ready == true && player2.ready == true){
         // Get updated data from the players
+        if(player1.startedGame == false || player2.startedGame == false){
+          player1.gameList[0].startGame();
+          player2.gameList[0].startGame();
+          player1.startedGame = true;
+          player2.startedGame = true;
+        }
         dataPackage = Player.update(players);
       
         // Send the data to the respective players
@@ -312,7 +421,25 @@ setInterval(function(){
     }
 
   }
-}, 1000/25);
+}, 1000/50);
+
+generateGameList = function(p1, p2){
+
+  var tempList = [];
+
+  // FOR NOW ONLY ONE GAME, THEREFORE, ONE GAME IN List
+  var g1 = BoxKick(p1, p2);
+  tempList.push(g1);
+
+  p1.gameList = tempList;
+  p2.gameList = tempList;
+  p1.game = p1.gameList[0].type;
+  p2.game = p1.gameList[0].type;
+
+  console.log("Starting game!!!!");
+
+  return;
+}
 
 // Handles room separation and queue stuff
 handleRoom = function(queue){
@@ -386,7 +513,10 @@ handleRoom = function(queue){
     player1.room = roomToJoin;
     player2.room = roomToJoin;
 
+    generateGameList(player1, player2);
+
     p1Socket.join(roomToJoin);
     p2Socket.join(roomToJoin);
+
     console.log("Joined room: " + roomToJoin);
 }

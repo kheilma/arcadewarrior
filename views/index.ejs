@@ -40,6 +40,17 @@
 
   var uniqueId = Math.random();
 
+  var game = "none";
+  var boxKickBG = new Image();
+  boxKickBG.src = "bkbg.png";
+
+  // Update game type
+  socket.on('gameType', function(data){
+
+    game = data.type;
+
+  });
+
   socket.emit('id', {id:uniqueId});
 
   // Do this stuff when in queue
@@ -70,18 +81,33 @@
   });
 
   socket.on('newPosition', function(data){
-    ctx.clearRect(0,0,800,600);
-    for(var i = 0; i < data.length; i++){
-      //ctx.fillText(data[i].number,data[i].x,data[i].y);
-      var img = new Image();
-      if(data[i].uniqueId === uniqueId){
-        img.src = "p1.png";
-      } else {
-        img.src = "p2.png";
+    if(game == "none"){
+      ctx.clearRect(0,0,800,600);
+      for(var i = 0; i < data.length; i++){
+        //ctx.fillText(data[i].number,data[i].x,data[i].y);
+        var img = new Image();
+        if(data[i].uniqueId === uniqueId){
+          img.src = "p1.png";
+        } else {
+          img.src = "p2.png";
+        }
+        // Draw image in center
+        ctx.drawImage(img,data[i].x-16,data[i].y-16);
       }
-      // Draw image in center
-      ctx.drawImage(img,data[i].x-16,data[i].y-16);
-  }
+    } else if(game == "BoxKick"){
+      ctx.clearRect(0,0,800,600);
+      ctx.drawImage(boxKickBG,0,0);
+      for(var i = 0; i < data.length; i++){
+        var img = new Image();
+        if(data[i].uniqueId === uniqueId){
+          img.src = "p1.png";
+        } else {
+          img.src = "p2.png";
+        }
+        // Draw image
+        ctx.drawImage(img,data[i].x,data[i].y);
+      }
+    }
     
   });
   // Detects key presses
