@@ -91,7 +91,7 @@ var BoxKick = function(p1, p2){
     var p2Socket = SOCKET_LIST[self.player2.id];
 
     // Stops function if a player leaves in the middle of the pause
-    if(self.player1 == undefined || self.player2 == undefined){
+    if(p1Socket == undefined || p2Socket == undefined){
       return;
     }
 
