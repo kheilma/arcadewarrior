@@ -494,24 +494,37 @@ handleCollisions = function(player1, player2){
         player1.pause = true;
         player2.pause = true;
 
+        // Player 1 above player2
         if(player1.y<player2.y){
           // player1 wins
           console.log("Player1 wins!!!!");
           player1.game.winner = "Player 1";
           player2.game.winner = "Player 1";
 
-          setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-          setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
-
-        } else {
+        // Player 2 above player1
+        } else if(player1.y>player2.y){
           // player2 wins
           console.log("Player2 wins!!!!");
           player1.game.winner = "Player 2";
           player2.game.winner = "Player 2";
+          
+        // Player1 and player2 are the same height
+        } else {
+          var random = Math.floor((Math.random() * 10) + 1);
 
-          setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-          setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+          if(random <= 5){
+            player1.game.winner = "Player 1";
+            player2.game.winner = "Player 1";
+
+          } else {
+            player1.game.winner = "Player 2";
+            player2.game.winner = "Player 2";
+          }
+
         }
+
+        setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
+        setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
 
       }
   }
