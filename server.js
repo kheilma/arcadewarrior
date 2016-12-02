@@ -90,6 +90,11 @@ var BoxKick = function(p1, p2){
     var p1Socket = SOCKET_LIST[self.player1.id];
     var p2Socket = SOCKET_LIST[self.player2.id];
 
+    // Stops function if a player leaves in the middle of the pause
+    if(self.player1 == undefined || self.player2 == undefined){
+      break;
+    }
+
     // Unpause if paused
     self.player1.pause = false;
     self.player2.pause = false;
@@ -517,18 +522,20 @@ hitDetect = function(player1, player2){
 
   // Handle who is on which side
   if(player1.game.type == "BoxKick" || player2.game.type == "BoxKick"){
-      if((player1.x > player2.x) && (player1.kicking==false || player2.kicking == false)){
+      if((player1.x > player2.x) && (player1.kicking==false)){
         player1.onRight = true;
         player1.onLeft = false;
-
-        player2.onLeft = true;
-        player2.onRight = false;
-      } else if((player1.x < player2.x) && (player1.kicking==false || player2.kicking == false)){
+      } else if((player1.x < player2.x) && (player1.kicking==false)){
         player1.onLeft = true;
         player1.onRight = false;
+      }
 
-        player2.onRight = true;
+      if((player2.x > player1.x) && (player2.kicking == false)){
         player2.onLeft = false;
+        player2.onRight = true;
+      } else if((player2.x < player1.x) && (player2.kicking == false)){
+        player2.onRight = false;
+        player2.onLeft = true;
       }
   }
 
