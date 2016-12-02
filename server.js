@@ -92,7 +92,7 @@ var BoxKick = function(p1, p2){
 
     // Stops function if a player leaves in the middle of the pause
     if(self.player1 == undefined || self.player2 == undefined){
-      break;
+      return;
     }
 
     // Unpause if paused
