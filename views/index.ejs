@@ -42,6 +42,7 @@
   Import script for socket.io and starting communicating to server
   !--> 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
 <script>
   var ctx = document.getElementById("ctx").getContext("2d");
   ctx.font = '30px Arial';
@@ -50,26 +51,59 @@
 
   var uniqueId = Math.random();
 
+  var game = "none";
+
+  var boxKickBG = new Image();
+  boxKickBG.src = "bkbg.png";
+
+  // Update game type
+  socket.on('gameType', function(data){
+
+    game = data.type;
+
+  });
+
   socket.emit('id', {id:uniqueId});
 
   // Do this stuff when in queue
   socket.on('queue', function(){
   
-    console.log("In queue!");
+    //console.log("In queue!");
+    ctx.clearRect(0,0,800,600);
+    ctx.fillText("You are in queue.",150,100);
 
   });
 
   // Do this stuff while waiting for both players to be ready
   socket.on('waiting', function(data){
+    ctx.clearRect(0,0,800,600);
+    var p1Ready = data.p1;
+    var p2Ready = data.p2;
+    //console.log("I'm waiting!");
+    ctx.fillText("Press space to ready up.",200,100);
 
-    console.log("I'm waiting!");
-  
+    if(p1Ready == true && p2Ready == false){
+      ctx.fillText("You: ready",50,200);
+      ctx.fillText("Opponent: not ready",50,300);
+    } else if(p1Ready == false && p2Ready == false){
+      ctx.fillText("You: not ready",50,200);
+      ctx.fillText("Opponent: not ready",50,300);
+    } else if(p1Ready == false && p2Ready == true){
+      ctx.fillText("You: not ready",50,200);
+      ctx.fillText("Opponent: ready",50,300);
+    }
+    
+    
   });
 
   // Drawing related things
 
+  socket.on('pauseOn', function(data){
+    var message = data.winner + " won the minigame!";
+    ctx.fillText(message,200,300);
+  });
+
   socket.on('playerLeft', function(){
-    ctx.clearRect(0,0,800,600);
     ctx.fillText("Other player has left. Sorry.",100,300);
   });
 
@@ -80,19 +114,33 @@
   });
 
   socket.on('newPosition', function(data){
-    ctx.clearRect(0,0,800,600);
-    for(var i = 0; i < data.length; i++){
-      //ctx.fillText(data[i].number,data[i].x,data[i].y);
-      var img = new Image();
-      if(data[i].uniqueId === uniqueId){
-        img.src = "p1.png";
-      } else {
-        img.src = "p2.png";
+    if(game == "none"){
+      ctx.clearRect(0,0,800,600);
+      for(var i = 0; i < data.length; i++){
+        //ctx.fillText(data[i].number,data[i].x,data[i].y);
+        var img = new Image();
+        if(data[i].uniqueId === uniqueId){
+          img.src = "p1.png";
+        } else {
+          img.src = "p2.png";
+        }
+        // Draw image in center
+        ctx.drawImage(img,data[i].x-16,data[i].y-16);
       }
-      // Draw image in center
-      ctx.drawImage(img,data[i].x-16,data[i].y-16);
-      
-  }
+    } else if(game == "BoxKick"){
+      ctx.clearRect(0,0,800,600);
+      ctx.drawImage(boxKickBG,0,0);
+      for(var i = 0; i < data.length; i++){
+        var img = new Image();
+        if(data[i].uniqueId === uniqueId){
+          img.src = "p1.png";
+        } else {
+          img.src = "p2.png";
+        }
+        // Draw image
+        ctx.drawImage(img,data[i].x,data[i].y);
+      }
+    }
     
   });
   // Detects key presses
@@ -135,3 +183,5 @@
   }
 
   </script>
+  <script src="js/Minigame.js"></script>
+  <script src="js/BoxKick.js"></script>
