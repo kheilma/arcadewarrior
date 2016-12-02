@@ -79,6 +79,7 @@ var BoxKick = function(p1, p2){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "BoxKick";
+  self.instructions = "Press W to jump, S to kick down.";
   self.time = 30;
 
   self.winner = "none";
@@ -107,8 +108,10 @@ var BoxKick = function(p1, p2){
     self.player2.y = 500;
 
     // Tell client what game type to draw
-    p1Socket.emit('gameType', {type:self.type});
-    p2Socket.emit('gameType', {type:self.type});
+    p1Socket.emit('instructions', {message:self.instructions, type:self.type});
+    p2Socket.emit('instructions', {message:self.instructions, type:self.type});
+    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 5000);
+    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 5000);
     self.player1.startedGame = true;
     self.player2.startedGame = true;
   }

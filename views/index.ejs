@@ -54,6 +54,13 @@
   socket.on('gameType', function(data){
     game = data.type;
   });
+
+  socket.on('instructions', function(data){
+    ctx.clearRect(0,0,800,600);
+    ctx.fillText("Game: " + data.type,130,50);
+    ctx.fillText(data.message,130,100);
+  });
+
   socket.emit('id', {id:uniqueId});
   // Do this stuff when in queue
   socket.on('queue', function(){
@@ -88,14 +95,14 @@
     ctx.fillText(message,200,300);
   });
   socket.on('playerLeft', function(){
-    ctx.fillText("Other player has left. Sorry.",100,300);
+    ctx.fillText("Other player has left. Sorry.",100,500);
   });
   socket.on('clearScreen', function(){
     ctx.clearRect(0,0,800,600);
   });
   socket.on('newPosition', function(data){
     if(game == "none"){
-      ctx.clearRect(0,0,800,600);
+      /*ctx.clearRect(0,0,800,600);
       for(var i = 0; i < data.length; i++){
         //ctx.fillText(data[i].number,data[i].x,data[i].y);
         var img = new Image();
@@ -106,7 +113,7 @@
         }
         // Draw image in center
         ctx.drawImage(img,data[i].x-16,data[i].y-16);
-      }
+      }*/
     } else if(game == "BoxKick"){
       ctx.clearRect(0,0,800,600);
       ctx.drawImage(boxKickBG,0,0);
@@ -123,6 +130,7 @@
     }
     
   });
+
   // Detects key presses
   document.onkeydown = function(event){
     if(event.keyCode === 68){
