@@ -99,6 +99,8 @@ var BoxKick = function(p1, p2){
     // Unpause if paused
     self.player1.pause = false;
     self.player2.pause = false;
+    self.player1.instructing = true;
+    self.player2.instructing = true;
 
     // Init player positions
     self.player1.x = 56;
@@ -112,6 +114,7 @@ var BoxKick = function(p1, p2){
     p2Socket.emit('instructions', {message:self.instructions, type:self.type});
     setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 5000);
     setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 5000);
+    
     self.player1.startedGame = true;
     self.player2.startedGame = true;
   }
@@ -176,6 +179,7 @@ var Player = function(id){
   self.game = "none";
   self.startedGame = false;
   self.pause = false;
+  self.instructing = false;
 
   self.onRight = false;
   self.onLeft = false;
@@ -421,42 +425,50 @@ setInterval(function(){
 
       // If both players are ready
       if((player1.ready == true && player2.ready == true)){
+        if((player1.instructing == false && player2.instructing == false)){
 
-        if(player1.pause==false && player2.pause==false){
-          // Get updated data from the players
-          if(player1.startedGame == false || player2.startedGame == false){
-            player1.game.startGame();
-            player2.game.startGame();
-          }
-          dataPackage = Player.update(players);
-          handleCollisions(player1,player2);
-        
-          // Send the data to the respective players
-          for(var i in players){
-            if(players[i] != undefined){
-              var socket = SOCKET_LIST[players[i].id];
-                socket.emit('newPosition', dataPackage);
+          if(player1.pause==false && player2.pause==false){
+            // Get updated data from the players
+              if(player1.startedGame == false || player2.startedGame == false){
+                player1.game.startGame();
+                player2.game.startGame();
+              }
+              dataPackage = Player.update(players);
+              handleCollisions(player1,player2);
+            
+              // Send the data to the respective players
+              for(var i in players){
+                if(players[i] != undefined){
+                  var socket = SOCKET_LIST[players[i].id];
+                    socket.emit('newPosition', dataPackage);
+                }
+              }
+            } else {
+
+              // Game is paused!!!
+              
+
+              // Customize message to each client
+              var winner = player1.game.winner;
+              var p1Winner = "";
+              var p2Winner = "";
+              if(winner == "Player 1"){
+                p1Winner = "You"
+                p2Winner = "Your opponent"
+              } else {
+                p1Winner = "Your opponent"
+                p2Winner = "You"
+              }
+
+              p1Socket.emit('pauseOn', {winner:p1Winner});
+              p2Socket.emit('pauseOn', {winner:p2Winner});
+
             }
-          }
+
         } else {
-
-          // Game is paused!!!
-          
-
-          // Customize message to each client
-          var winner = player1.game.winner;
-          var p1Winner = "";
-          var p2Winner = "";
-          if(winner == "Player 1"){
-            p1Winner = "You"
-            p2Winner = "Your opponent"
-          } else {
-            p1Winner = "Your opponent"
-            p2Winner = "You"
-          }
-
-          p1Socket.emit('pauseOn', {winner:p1Winner});
-          p2Socket.emit('pauseOn', {winner:p2Winner});
+          // Instructing!
+          setTimeout(function() {player1.instructing = false;}, 5000);
+          setTimeout(function() {player2.instructing = false;}, 5000);
 
         }
 
