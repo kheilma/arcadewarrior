@@ -71,11 +71,7 @@ var MetaGame = function(p1, p2){
     var p1 = SOCKET_LIST[self.player1.id];
     var p2 = SOCKET_LIST[self.player2.id];
 
-    if(p1 == undefined){
-      p2.emit('playerLeft');
-      return;
-    } else if(p2 == undefined){
-      p1.emit('playerLeft');
+    if(p1 == undefined || p2 == undefined){
       return;
     }
 
