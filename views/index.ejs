@@ -1,23 +1,27 @@
 <!doctype html>
 <html>
 <head>
+
 	<link rel="stylesheet" href="stylesheets/style.css" />
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  
 </head>
 <body>
+<div id = "header" class = "arcadeHeader">
 <ul> 
 <li> <a href = "/login">Login</a></li>
 <li> <a href = "/profile">Profile</a></li>
 <li> <a href = "/signup">Sign Up</a></li>
 <li> <a href = "/game">Play</a></li>
 </ul>
-<div id = "centered">
-<img src="arcadewarrior3.png" style = "width:280px;height:280px;top:-200px;position:relative;" alt="AW"/>
 </div>
-
-</body>
-</html>
-
-<canvas id="ctx" width = "800" height="600" style="border:1px solid #000000; background-color : white;  padding-left: 0;
+<div class = "container-flud" id = "centered">
+  <img src="arcadewarrior3.png" style = "width:280px;height:280px;top:-150px;position:relative;"/>
+</div>
+<div id = "wrapper" style = "background-color: black;">
+<div id = "container">
+<div id = "game_swf">
+<canvas id="ctx" width = "800" height="600" style="background-color : white;  padding-left: 0;
     padding: 0;
     margin: auto;
     display: block;
@@ -26,6 +30,11 @@
     bottom: 0;
     left: 0;
     right: 0;"></canvas> 
+    </div>
+    </div>
+    </div>
+</body>
+</html>
 
 <!-- 
   Import script for socket.io and starting communicating to server
@@ -37,32 +46,29 @@
   ctx.font = '30px Arial';
   // Creats socket connection to server
   var socket = io.connect();
-
   var uniqueId = Math.random();
-
   var game = "none";
-
   var boxKickBG = new Image();
   boxKickBG.src = "bkbg.png";
-
   // Update game type
   socket.on('gameType', function(data){
-
     game = data.type;
+  });
 
+  socket.on('instructions', function(data){
+    ctx.clearRect(0,0,800,600);
+    ctx.fillText("Game: " + data.type,130,50);
+    ctx.fillText(data.message,130,100);
   });
 
   socket.emit('id', {id:uniqueId});
-
   // Do this stuff when in queue
   socket.on('queue', function(){
   
     //console.log("In queue!");
     ctx.clearRect(0,0,800,600);
     ctx.fillText("You are in queue.",150,100);
-
   });
-
   // Do this stuff while waiting for both players to be ready
   socket.on('waiting', function(data){
     ctx.clearRect(0,0,800,600);
@@ -70,7 +76,6 @@
     var p2Ready = data.p2;
     //console.log("I'm waiting!");
     ctx.fillText("Press space to ready up.",200,100);
-
     if(p1Ready == true && p2Ready == false){
       ctx.fillText("You: ready",50,200);
       ctx.fillText("Opponent: not ready",50,300);
@@ -84,27 +89,20 @@
     
     
   });
-
   // Drawing related things
-
   socket.on('pauseOn', function(data){
     var message = data.winner + " won the minigame!";
     ctx.fillText(message,200,300);
   });
-
   socket.on('playerLeft', function(){
-    ctx.fillText("Other player has left. Sorry.",100,300);
+    ctx.fillText("Other player has left. Sorry.",100,500);
   });
-
   socket.on('clearScreen', function(){
-
     ctx.clearRect(0,0,800,600);
-
   });
-
   socket.on('newPosition', function(data){
     if(game == "none"){
-      ctx.clearRect(0,0,800,600);
+      /*ctx.clearRect(0,0,800,600);
       for(var i = 0; i < data.length; i++){
         //ctx.fillText(data[i].number,data[i].x,data[i].y);
         var img = new Image();
@@ -115,7 +113,7 @@
         }
         // Draw image in center
         ctx.drawImage(img,data[i].x-16,data[i].y-16);
-      }
+      }*/
     } else if(game == "BoxKick"){
       ctx.clearRect(0,0,800,600);
       ctx.drawImage(boxKickBG,0,0);
@@ -132,6 +130,7 @@
     }
     
   });
+
   // Detects key presses
   document.onkeydown = function(event){
     if(event.keyCode === 68){
@@ -170,7 +169,6 @@
       // Space key
     }
   }
-
   </script>
   <script src="js/Minigame.js"></script>
   <script src="js/BoxKick.js"></script>

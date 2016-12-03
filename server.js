@@ -79,6 +79,7 @@ var BoxKick = function(p1, p2){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "BoxKick";
+  self.instructions = "Press W to jump, S to kick down.";
   self.time = 30;
 
   self.winner = "none";
@@ -90,9 +91,16 @@ var BoxKick = function(p1, p2){
     var p1Socket = SOCKET_LIST[self.player1.id];
     var p2Socket = SOCKET_LIST[self.player2.id];
 
+    // Stops function if a player leaves in the middle of the pause
+    if(p1Socket == undefined || p2Socket == undefined){
+      return;
+    }
+
     // Unpause if paused
     self.player1.pause = false;
     self.player2.pause = false;
+    self.player1.instructing = true;
+    self.player2.instructing = true;
 
     // Init player positions
     self.player1.x = 56;
@@ -102,8 +110,11 @@ var BoxKick = function(p1, p2){
     self.player2.y = 500;
 
     // Tell client what game type to draw
-    p1Socket.emit('gameType', {type:self.type});
-    p2Socket.emit('gameType', {type:self.type});
+    p1Socket.emit('instructions', {message:self.instructions, type:self.type});
+    p2Socket.emit('instructions', {message:self.instructions, type:self.type});
+    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 5000);
+    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 5000);
+    
     self.player1.startedGame = true;
     self.player2.startedGame = true;
   }
@@ -168,6 +179,7 @@ var Player = function(id){
   self.game = "none";
   self.startedGame = false;
   self.pause = false;
+  self.instructing = false;
 
   self.onRight = false;
   self.onLeft = false;
@@ -413,42 +425,50 @@ setInterval(function(){
 
       // If both players are ready
       if((player1.ready == true && player2.ready == true)){
+        if((player1.instructing == false && player2.instructing == false)){
 
-        if(player1.pause==false && player2.pause==false){
-          // Get updated data from the players
-          if(player1.startedGame == false || player2.startedGame == false){
-            player1.game.startGame();
-            player2.game.startGame();
-          }
-          dataPackage = Player.update(players);
-          handleCollisions(player1,player2);
-        
-          // Send the data to the respective players
-          for(var i in players){
-            if(players[i] != undefined){
-              var socket = SOCKET_LIST[players[i].id];
-                socket.emit('newPosition', dataPackage);
+          if(player1.pause==false && player2.pause==false){
+            // Get updated data from the players
+              if(player1.startedGame == false || player2.startedGame == false){
+                player1.game.startGame();
+                player2.game.startGame();
+              }
+              dataPackage = Player.update(players);
+              handleCollisions(player1,player2);
+            
+              // Send the data to the respective players
+              for(var i in players){
+                if(players[i] != undefined){
+                  var socket = SOCKET_LIST[players[i].id];
+                    socket.emit('newPosition', dataPackage);
+                }
+              }
+            } else {
+
+              // Game is paused!!!
+              
+
+              // Customize message to each client
+              var winner = player1.game.winner;
+              var p1Winner = "";
+              var p2Winner = "";
+              if(winner == "Player 1"){
+                p1Winner = "You"
+                p2Winner = "Your opponent"
+              } else {
+                p1Winner = "Your opponent"
+                p2Winner = "You"
+              }
+
+              p1Socket.emit('pauseOn', {winner:p1Winner});
+              p2Socket.emit('pauseOn', {winner:p2Winner});
+
             }
-          }
+
         } else {
-
-          // Game is paused!!!
-          
-
-          // Customize message to each client
-          var winner = player1.game.winner;
-          var p1Winner = "";
-          var p2Winner = "";
-          if(winner == "Player 1"){
-            p1Winner = "You"
-            p2Winner = "Your opponent"
-          } else {
-            p1Winner = "Your opponent"
-            p2Winner = "You"
-          }
-
-          p1Socket.emit('pauseOn', {winner:p1Winner});
-          p2Socket.emit('pauseOn', {winner:p2Winner});
+          // Instructing!
+          setTimeout(function() {player1.instructing = false;}, 5000);
+          setTimeout(function() {player2.instructing = false;}, 5000);
 
         }
 
@@ -489,24 +509,37 @@ handleCollisions = function(player1, player2){
         player1.pause = true;
         player2.pause = true;
 
+        // Player 1 above player2
         if(player1.y<player2.y){
           // player1 wins
           console.log("Player1 wins!!!!");
           player1.game.winner = "Player 1";
           player2.game.winner = "Player 1";
 
-          setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-          setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
-
-        } else {
+        // Player 2 above player1
+        } else if(player1.y>player2.y){
           // player2 wins
           console.log("Player2 wins!!!!");
           player1.game.winner = "Player 2";
           player2.game.winner = "Player 2";
+          
+        // Player1 and player2 are the same height
+        } else {
+          var random = Math.floor((Math.random() * 10) + 1);
 
-          setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-          setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+          if(random <= 5){
+            player1.game.winner = "Player 1";
+            player2.game.winner = "Player 1";
+
+          } else {
+            player1.game.winner = "Player 2";
+            player2.game.winner = "Player 2";
+          }
+
         }
+
+        setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
+        setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
 
       }
   }
@@ -517,18 +550,20 @@ hitDetect = function(player1, player2){
 
   // Handle who is on which side
   if(player1.game.type == "BoxKick" || player2.game.type == "BoxKick"){
-      if((player1.x > player2.x) && (player1.kicking==false || player2.kicking == false)){
+      if((player1.x > player2.x) && (player1.kicking==false)){
         player1.onRight = true;
         player1.onLeft = false;
-
-        player2.onLeft = true;
-        player2.onRight = false;
-      } else if((player1.x < player2.x) && (player1.kicking==false || player2.kicking == false)){
+      } else if((player1.x < player2.x) && (player1.kicking==false)){
         player1.onLeft = true;
         player1.onRight = false;
+      }
 
-        player2.onRight = true;
+      if((player2.x > player1.x) && (player2.kicking == false)){
         player2.onLeft = false;
+        player2.onRight = true;
+      } else if((player2.x < player1.x) && (player2.kicking == false)){
+        player2.onRight = false;
+        player2.onLeft = true;
       }
   }
 
