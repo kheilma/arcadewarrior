@@ -57,6 +57,54 @@ var queue = [];
 //Number of connections
 var numOfConnections = 0;
 
+var MetaGame = function(p1, p2){
+  var self = {
+    p1Score:0,
+    p2Score:0,
+    player1:p1,
+    player2:p2,
+  }
+
+  // If the score is >= 2 (for 3 total minigames)
+  // End the match
+  self.endMatch = function(player){
+    var p1 = SOCKET_LIST[self.player1.id];
+    var p2 = SOCKET_LIST[self.player2.id];
+
+    if(p1 == undefined){
+      p2Socket.emit('playerLeft');
+    } else if(p2 == undefined){
+      p1Socket.emit('playerLeft');
+    }
+
+    self.player1.pause = false;
+    self.player2.pause = false;
+
+    // Code to end metagame and take client out of the game and back to the main page
+    if(player == "p1"){
+      p1.emit('endMatch', {winner:"You"});
+      p2.emit('endMatch', {winner:"Opponent"});
+    } else {
+      p1.emit('endMatch', {winner:"Opponent"});
+      p2.emit('endMatch', {winner:"You"});
+    }
+
+  }
+
+  // Called after each minigame ends to see if the score is >=2 (for now)
+  self.checkIfEnd = function(){
+    if(self.p1Score >= 2){
+      return "p1";
+    } else if(self.p2Score >= 2){
+      return "p2";
+    } 
+
+    return "none";
+  }
+
+  return self;
+}
+
 var Minigame = function(){
   var self = {
         type:"none",
@@ -75,8 +123,9 @@ var Minigame = function(){
     return self;
 }
 
-var BoxKick = function(p1, p2){
+var BoxKick = function(p1, p2, metaGame){
   var self = Minigame();
+  self.metaGame = metaGame;
   self.player1 = p1;
   self.player2 = p2;
   self.type = "BoxKick";
@@ -84,8 +133,6 @@ var BoxKick = function(p1, p2){
   self.time = 30;
 
   self.winner = "none";
-  self.p1Score = 0;
-  self.p2Score = 0;
 
   self.startGame = function(){
     // Turn players into sockets for emitting
@@ -97,6 +144,9 @@ var BoxKick = function(p1, p2){
       return;
     }
 
+    self.player1.game = self;
+    self.player2.game = self;
+
     // Unpause if paused
     self.player1.pause = false;
     self.player2.pause = false;
@@ -104,7 +154,7 @@ var BoxKick = function(p1, p2){
     self.player2.instructing = true;
 
     // Init player positions
-    self.player1.x = 56;
+    self.player1.x = 36;
     self.player1.y = 500;
 
     self.player2.x = 700;
@@ -113,8 +163,8 @@ var BoxKick = function(p1, p2){
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
     p2Socket.emit('instructions', {message:self.instructions, type:self.type});
-    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 5000);
-    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 5000);
+    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 3000);
+    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 3000);
     
     self.player1.startedGame = true;
     self.player2.startedGame = true;
@@ -122,6 +172,171 @@ var BoxKick = function(p1, p2){
 
   self.finish = function(nextGame){
     //Update score here....
+    if(self.winner == "Player 1"){
+      self.metaGame.p1Score++;
+    } else {
+      self.metaGame.p2Score++;
+    }
+
+    if(nextGame == undefined || self.metaGame.checkIfEnd()!="none"){
+      // Last Minigame!!!!
+      self.metaGame.endMatch(self.metaGame.checkIfEnd());
+      return;
+    }
+
+    // Start next game
+    nextGame.startGame();
+  }
+
+  return self;
+}
+
+var DodgeGame = function(p1, p2, metaGame){
+  var self = Minigame();
+  self.metaGame = metaGame;
+  self.player1 = p1;
+  self.player2 = p2;
+  self.type = "Dodge This";
+  self.instructions = "Use WSAD to move around and dodge";
+  self.time = 30;
+
+  self.winner = "none";
+
+  self.thingsToDodge = [];
+
+  self.genRandomPos = function(min, max){
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  self.genRandom = function(min, max){
+    return Math.random() * (max - min) + min;
+  }
+
+  self.updateThingsToDodge = function(){
+    for(var i = 0; i < self.thingsToDodge.length; i++){
+      self.thingsToDodge[i].x += self.thingsToDodge[i].spdX;
+      self.thingsToDodge[i].y += self.thingsToDodge[i].spdY;
+    }
+  }
+
+  self.initializeThingsToDodge = function(){
+    var numOfThings = 10;
+
+    // For each thing to dodge
+    for(var i = 0; i < numOfThings; i++){
+      var thing = entity();
+
+      // Choose which positions they use as well as speeds based on position
+      var decide = Math.floor((Math.random() * 8) + 1);
+      // Upper left
+      if(decide == 1){
+        thing.x = self.genRandomPos(-200,-600); 
+        thing.y = self.genRandomPos(-200,-600);
+
+        thing.spdX = self.genRandom(1,3); 
+        thing.spdY = self.genRandom(1,3); 
+      // Bottom left
+      } else if(decide == 2){
+        thing.x = self.genRandomPos(-200,-600); 
+        thing.y = self.genRandomPos(800,1200); 
+
+        thing.spdX = self.genRandom(1,3); 
+        thing.spdY = self.genRandom(-1,-3);
+      // Upper right
+      } else if(decide == 3){
+        thing.x = self.genRandomPos(1000,1400); 
+        thing.y = self.genRandomPos(-200,-600); 
+
+        thing.spdX = self.genRandom(-1,-3); 
+        thing.spdY = self.genRandom(1,3); 
+      // Bottom right
+      } else if(decide == 4){
+        thing.x = self.genRandomPos(1000,1400); 
+        thing.y = self.genRandomPos(800,1200); 
+
+        thing.spdX = self.genRandom(-1,-3); 
+        thing.spdY = self.genRandom(-1,-3); 
+      // Top
+      } else if(decide == 5){
+        thing.x = self.genRandomPos(50,750); 
+        thing.y = self.genRandomPos(-200,-600); 
+
+        thing.spdX = 0;
+        thing.spdY = self.genRandom(1,3);
+      // Bottom
+      } else if(decide == 6){
+        thing.x = self.genRandomPos(50,750);
+        thing.y = self.genRandomPos(800,1200);
+
+        thing.spdX = 0;
+        thing.spdY = self.genRandom(-1,-3);
+      // Left
+      } else if(decide == 7){
+        thing.x = self.genRandomPos(-200,-600);
+        thing.y = self.genRandomPos(50,550);
+
+        thing.spdX = self.genRandom(1,3);
+        thing.spdY = 0;
+      // Right
+      } else {
+        thing.x = self.genRandomPos(1000,1400);
+        thing.y = self.genRandomPos(50,550);
+
+        thing.spdX = self.genRandom(-1,-3);
+        thing.spdY = 0;
+      }
+
+      // After everything is generated for the individual thing, we push it to the array
+      self.thingsToDodge.push(thing);
+    }
+  }
+
+  self.startGame = function(){
+    // Turn players into sockets for emitting
+    var p1Socket = SOCKET_LIST[self.player1.id];
+    var p2Socket = SOCKET_LIST[self.player2.id];
+
+    // Stops function if a player leaves in the middle of the pause
+    if(p1Socket == undefined || p2Socket == undefined){
+      return;
+    }
+
+    self.player1.game = self;
+    self.player2.game = self;
+
+    // Init array of things to dodge
+    self.initializeThingsToDodge();
+    self.player1.thingsToDodge = self.thingsToDodge;
+    self.player2.thingsToDodge = self.thingsToDodge;
+
+    // Unpause if paused
+    self.player1.pause = false;
+    self.player2.pause = false;
+    self.player1.instructing = true;
+    self.player2.instructing = true;
+
+    // Init player positions
+    self.player1.x = 336;
+    self.player1.y = 268;
+
+    self.player2.x = 400;
+    self.player2.y = 268;
+
+    // Tell client what game type to draw
+    p1Socket.emit('instructions', {message:self.instructions, type:self.type});
+    p2Socket.emit('instructions', {message:self.instructions, type:self.type});
+    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 3000);
+    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 3000);
+    
+    self.player1.startedGame = true;
+    self.player2.startedGame = true;
+  }
+
+  self.finish = function(nextGame){
+    //Update score here....
+
+    //Reset thingsToDodge.
+    self.thingsToDodge = [];
 
     User.find({}, function(err, users) {
   if (err) throw err;
@@ -131,9 +346,15 @@ var BoxKick = function(p1, p2){
 });
 
     if(self.winner == "Player 1"){
-      self.p1Score++;
+      self.metaGame.p1Score++;
     } else {
-      self.p2Score++;
+      self.metaGame.p2Score++;
+    }
+
+    if(nextGame == undefined || self.metaGame.checkIfEnd()!="none"){
+      // Last Minigame!!!!
+      self.metaGame.endMatch(self.metaGame.checkIfEnd());
+      return;
     }
 
     // Start next game
@@ -146,8 +367,8 @@ var BoxKick = function(p1, p2){
 // General entity super class.
 var entity = function(){
     var self = {
-      x:Math.floor(Math.random() * 250) + 30,
-      y:Math.floor(Math.random() * 250) + 30,
+      x:0,
+      y:0,
       spdX:0,
       spdY:0,
       id:"",
@@ -183,16 +404,22 @@ var Player = function(id){
   self.ready = false;
   self.uniqueId = -1;
 
+  self.metaGame = undefined;
   self.gameList = [];
   self.game = "none";
+  self.currGameNum = 0;
   self.startedGame = false;
   self.pause = false;
   self.instructing = false;
 
+  // BoxKick Stuff
   self.onRight = false;
   self.onLeft = false;
   self.jumping = false;
   self.kicking = false;
+
+  // Dodge This
+  self.thingsToDodge = [];
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -313,19 +540,34 @@ Player.onDisconnect = function(socket){
 }
 
 // Static update function for all Players
-Player.update = function(players){
+Player.update = function(players, gameType){
   var dataPackage = [];
   // Loop through each player in given player array
-  for(var i in players){
-    var player = players[i];
-    if(player != undefined){
-      player.update();
-      dataPackage.push({
-        x:player.x,
-        y:player.y,
-        number:player.number,
-        uniqueId:player.uniqueId,
-      });
+  if(gameType == "BoxKick"){
+    for(var i in players){
+      var player = players[i];
+      if(player != undefined){
+        player.update();
+        dataPackage.push({
+          x:player.x,
+          y:player.y,
+          uniqueId:player.uniqueId,
+        });
+      }
+    }
+  } else if(gameType == "Dodge This"){
+    for(var i in players){
+      var player = players[i];
+      player.game.updateThingsToDodge();
+      if(player != undefined){
+        player.update();
+        dataPackage.push({
+          x:player.x,
+          y:player.y,
+          uniqueId:player.uniqueId,
+          dodgeArray:player.thingsToDodge,
+        });
+      }
     }
   }
 
@@ -441,7 +683,7 @@ setInterval(function(){
                 player1.game.startGame();
                 player2.game.startGame();
               }
-              dataPackage = Player.update(players);
+              dataPackage = Player.update(players, player1.game.type);
               handleCollisions(player1,player2);
             
               // Send the data to the respective players
@@ -512,7 +754,7 @@ setInterval(function(){
 handleCollisions = function(player1, player2){
 
   if(player1.game.type == "BoxKick" || player2.game.type == "BoxKick"){
-      if(hitDetect(player1,player2)){
+      if(hitDetect(player1,player2)=="hit"){
 
         player1.pause = true;
         player2.pause = true;
@@ -520,14 +762,12 @@ handleCollisions = function(player1, player2){
         // Player 1 above player2
         if(player1.y<player2.y){
           // player1 wins
-          console.log("Player1 wins!!!!");
           player1.game.winner = "Player 1";
           player2.game.winner = "Player 1";
 
         // Player 2 above player1
         } else if(player1.y>player2.y){
           // player2 wins
-          console.log("Player2 wins!!!!");
           player1.game.winner = "Player 2";
           player2.game.winner = "Player 2";
           
@@ -546,15 +786,51 @@ handleCollisions = function(player1, player2){
 
         }
 
-        setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-        setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+        player1.currGameNum++;
+        player2.currGameNum++;
+        setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+        //setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
 
       }
+  } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
+
+    // Player1 was hit
+    if(hitDetect(player1,player2) == "p1"){
+      player1.pause = true;
+      player2.pause = true;
+
+      player1.game.winner = "Player 2";
+      player2.game.winner = "Player 2";
+
+      player1.currGameNum++;
+      player2.currGameNum++;
+      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+     // setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
+    // Player2 was hit
+    } else if(hitDetect(player1,player2) == "p2"){
+      player1.pause = true;
+      player2.pause = true;
+
+      player1.game.winner = "Player 1";
+      player2.game.winner = "Player 1";
+
+      player1.currGameNum++;
+      player2.currGameNum++;
+      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+      //setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
+    }
+
   }
 
 }
 
 hitDetect = function(player1, player2){
+
+  // Set x and y to the center of each box
+  var p1x = player1.x+32;
+  var p1y = player1.y+32;
+  var p2x = player2.x+32;
+  var p2y = player2.y+32;
 
   // Handle who is on which side
   if(player1.game.type == "BoxKick" || player2.game.type == "BoxKick"){
@@ -573,36 +849,49 @@ hitDetect = function(player1, player2){
         player2.onRight = false;
         player2.onLeft = true;
       }
-  }
 
-  // Set x and y to the center of each box
-  var p1x = player1.x+32;
-  var p1y = player1.y+32;
-  var p2x = player2.x+32;
-  var p2y = player2.y+32;
+      if(p1x+32 >= p2x-32 && p1x-32 <= p2x+32 && p1y+32 >= p2y-32 && p1y-32 <= p2y+32){
+        return "hit";
+      }
 
-  if(p1x+32 >= p2x-32 && p1x-32 <= p2x+32 && p1y+32 >= p2y-32 && p1y-32 <= p2y+32){
-    return true;
+      return undefined;
+  } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
+    var thingsToDodge = player1.game.thingsToDodge;
+
+    for(var i = 0; i < thingsToDodge.length; i++){
+      var boxX = thingsToDodge[i].x+16;
+      var boxY = thingsToDodge[i].y+16;
+      
+      if(p1x+32 >= boxX-16 && p1x-32 <= boxX+16 && p1y+32 >= boxY-16 && p1y-32 <= boxY+16){
+        return "p1";
+      } else if(p2x+32 >= boxX-16 && p2x-32 <= boxX+16 && p2y+32 >= boxY-16 && p2y-32 <= boxY+16){
+        return "p2";
+      }
+
+    }
+
+    return undefined;
   }
-  
-  return false;
 
 }
 
 generateGameList = function(p1, p2){
 
   var tempList = [];
+  var mg = MetaGame(p1,p2);
 
   // FOR NOW ONLY ONE GAME, THEREFORE, ONE GAME IN List
-  var g1 = BoxKick(p1, p2);
+  var g1 = BoxKick(p1, p2, mg);
+  var g2 = DodgeGame(p1, p2, mg);
+  tempList.push(g2);
   tempList.push(g1);
 
+  p1.metaGame = mg;
+  p2.metaGame = mg;
   p1.gameList = tempList;
   p2.gameList = tempList;
   p1.game = p1.gameList[0];
-  p2.game = p1.gameList[0];
-
-  console.log("Starting game!!!!");
+  p2.game = p2.gameList[0];
 
   return;
 }

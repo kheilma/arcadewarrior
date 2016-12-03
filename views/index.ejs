@@ -53,10 +53,22 @@
   var ctx = document.getElementById("ctx").getContext("2d");
   ctx.font = '30px Arial';
   var socket = io.connect();
+
   var uniqueId = Math.random();
   var game = "none";
+
+  // For boxkick
   var boxKickBG = new Image();
   boxKickBG.src = "bkbg.png";
+
+  //For dodgeThis
+  var thingToDodge = new Image();
+  thingToDodge.src = "thingToDodge.png";
+
+  var thingToDodgeBG = new Image();
+  thingToDodgeBG.src = "thingToDodgeBG.png";
+
+
   // Update game type
   socket.on('gameType', function(data){
     game = data.type;
@@ -72,7 +84,6 @@
   // Do this stuff when in queue
   socket.on('queue', function(){
   
-    //console.log("In queue!");
     ctx.clearRect(0,0,800,600);
     ctx.fillText("You are in queue.",150,100);
   });
@@ -81,7 +92,7 @@
     ctx.clearRect(0,0,800,600);
     var p1Ready = data.p1;
     var p2Ready = data.p2;
-    //console.log("I'm waiting!");
+
     ctx.fillText("Press space to ready up.",200,100);
     if(p1Ready == true && p2Ready == false){
       ctx.fillText("You: ready",50,200);
@@ -97,6 +108,13 @@
     
   });
   // Drawing related things
+  socket.on('endMatch', function(data){
+    ctx.clearRect(0,0,800,600);
+    var message = data.winner + " won the entire match!";
+    ctx.fillText(message,200,300);
+    socket.disconnect();
+  });
+
   socket.on('pauseOn', function(data){
     var message = data.winner + " won the minigame!";
     ctx.fillText(message,200,300);
@@ -121,8 +139,9 @@
         } else {
           img.src = "p2.png";
         }
-        // Draw image in center
         ctx.drawImage(img,data[i].x-16,data[i].y-16);
+        // Draw image in center
+        
       }*/
     } else if(game == "BoxKick"){
       ctx.clearRect(0,0,800,600);
@@ -137,7 +156,32 @@
         // Draw image
         ctx.drawImage(img,data[i].x,data[i].y);
       }
+    } else if(game == "Dodge This"){
+      ctx.clearRect(0,0,800,600);
+      ctx.drawImage(thingToDodgeBG,0,0);
+      var thingsToDodge = [];
+      // For each player data
+      for(var i = 0; i < data.length; i++){
+        var img = new Image();
+        if(data[i].uniqueId === uniqueId){
+          img.src = "p1.png";
+          thingsToDodge = data[i].dodgeArray;
+        } else {
+          img.src = "p2.png";
+        }
+        // Draw image
+        ctx.drawImage(img,data[i].x,data[i].y);
+      }
+
+      // Draw the clients things to dodge
+      // No need to draw the Opponent's things to dodge
+      //thingsToDodge = thisClient.dodgeArray;
+      for(var i = 0; i < thingsToDodge.length; i++){
+        ctx.drawImage(thingToDodge,thingsToDodge[i].x,thingsToDodge[i].y);
+      }
+      
     }
+
     
   });
 
