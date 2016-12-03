@@ -56,6 +56,38 @@ var queue = [];
 //Number of connections
 var numOfConnections = 0;
 
+var MetaGame = function(p1, p2){
+  var self = {
+    p1Score:0,
+    p2Score:0,
+    player1:p1,
+    player2:p2,
+  }
+
+  // If the score is >= 2 (for 3 total minigames)
+  // End the match
+  endMatch = function(player){
+
+    // Code to end metagame and take client out of the game and back to the main page
+
+  }
+
+  // Called after each minigame ends to see if the score is >=2 (for now)
+  checkIfEnd = function(){
+    if(p1Score >= 2){
+      endMatch(p1);
+      return true;
+    } else if(p2Score >= 2){
+      endMatch(p2);
+      return true;
+    }
+
+    return false;
+  }
+
+  return self;
+}
+
 var Minigame = function(){
   var self = {
         type:"none",
@@ -74,8 +106,9 @@ var Minigame = function(){
     return self;
 }
 
-var BoxKick = function(p1, p2){
+var BoxKick = function(p1, p2, metaGame){
   var self = Minigame();
+  self.metaGame = metaGame;
   self.player1 = p1;
   self.player2 = p2;
   self.type = "BoxKick";
@@ -83,8 +116,6 @@ var BoxKick = function(p1, p2){
   self.time = 30;
 
   self.winner = "none";
-  self.p1Score = 0;
-  self.p2Score = 0;
 
   self.startGame = function(){
     // Turn players into sockets for emitting
@@ -95,6 +126,150 @@ var BoxKick = function(p1, p2){
     if(p1Socket == undefined || p2Socket == undefined){
       return;
     }
+
+    // Unpause if paused
+    self.player1.pause = false;
+    self.player2.pause = false;
+    self.player1.instructing = true;
+    self.player2.instructing = true;
+
+    // Init player positions
+    self.player1.x = 36;
+    self.player1.y = 500;
+
+    self.player2.x = 700;
+    self.player2.y = 500;
+
+    // Tell client what game type to draw
+    p1Socket.emit('instructions', {message:self.instructions, type:self.type});
+    p2Socket.emit('instructions', {message:self.instructions, type:self.type});
+    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 5000);
+    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 5000);
+    
+    self.player1.startedGame = true;
+    self.player2.startedGame = true;
+  }
+
+  self.finish = function(nextGame){
+    //Update score here....
+
+    if(self.winner == "Player 1"){
+      self.metGame.p1Score++;
+    } else {
+      self.metGame.p2Score++;
+    }
+
+    // Start next game
+    nextGame.startGame();
+  }
+
+  return self;
+}
+
+var DodgeGame = function(p1, p2, metaGame){
+  var self = Minigame();
+  self.metaGame = metaGame;
+  self.player1 = p1;
+  self.player2 = p2;
+  self.type = "Dodge This";
+  self.instructions = "Use WSAD to move around and dodge";
+  self.time = 30;
+
+  self.winner = "none";
+
+  self.thingsToDodge = [];
+
+  self.genRandom = function(min, max){
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  self.initializeThingsToDodge = function(){
+    var numOfThings = 25;
+
+    // For each thing to dodge
+    for(var i = 0; i < numOfThings; i++){
+      var thing = entity();
+
+      // Choose which positions they use as well as speeds based on position
+      var decide = Math.floor((Math.random() * 8) + 1);
+      // Upper left
+      if(decide == 1){
+        thing.x = self.genRandom(-50,-200); // Generate from -50 -> -200
+        thing.y = self.genRandom(-50,-200); // Generate from -50 -> -200
+
+        thing.spdX = self.genRandom(4,10); // Generate a value between 4 and 10
+        thing.spdY = self.genRandom(4,10); // Generate a value between 4 and 10
+      // Bottom left
+      } else if(decide == 2){
+        thing.x = self.genRandom(-50,-200);  // Generate from -50 -> -200
+        thing.y = self.genRandom(650,800); // Generate from 650 -> 800
+
+        thing.spdX = self.genRandom(4,10); // Generate a value between 4 and 10
+        thing.spdY = self.genRandom(-4,-10); // Generate a value between -4 and -10
+      // Upper right
+      } else if(decide == 3){
+        thing.x = self.genRandom(850,1000); // Generate from 850 -> 1000
+        thing.y = self.genRandom(-50,-200); // Generate from -50 -> -200
+
+        thing.spdX = self.genRandom(-4,-10); // Generate a value between -4 and -10
+        thing.spdY = self.genRandom(4,10); // Generate a value between 4 and 10
+      // Bottom right
+      } else if(decide == 4){
+        thing.x = self.genRandom(850,1000); // Generate from 850 -> 1000
+        thing.y = self.genRandom(650,800); // Generate from 650 -> 800
+
+        thing.spdX = self.genRandom(-4,-10); // Generate a value between -4 and -10
+        thing.spdY = self.genRandom(-4,-10); // Generate a value between -4 and -10
+      // Top
+      } else if(decide == 5){
+        thing.x = self.genRandom(50,750); // Generate from 50 -> 750
+        thing.y = self.genRandom(-50,-200); // Generate from -50 -> -200
+
+        thing.spdX = 0;
+        thing.spdY = self.genRandom(4,10); // Generate a value between 4 and 10
+      // Bottom
+      } else if(decide == 6){
+        thing.x = self.genRandom(50,750); // Generate from 50 -> 750
+        thing.y = self.genRandom(650,800); // Generate from 650 -> 800
+
+        thing.spdX = 0;
+        thing.spdY = self.genRandom(-4,-10); // Generate a value between -4 and -10
+      // Left
+      } else if(decide == 7){
+        thing.x = self.genRandom(-50,-200); // Generate from -50 -> -200
+        thing.y = self.genRandom(50,550); // Generate from 50 -> 550
+
+        thing.spdX = self.genRandom(4,10); // Generate a value between 4 and 10
+        thing.spdY = 0;
+      // Right
+      } else {
+        thing.x = self.genRandom(850,1000); // Generate from 850 -> 1000
+        thing.y = self.genRandom(50,550); // Generate from 50 -> 550
+
+        thing.spdX = self.genRandom(-4,-10); // Generate a value between -4 and -10
+        thing.spdY = 0;
+      }
+
+      // After everything is generated for the individual thing, we push it to the array
+      self.thingsToDodge.push(thing);
+    }
+
+  }
+
+  self.startGame = function(){
+    // Turn players into sockets for emitting
+    var p1Socket = SOCKET_LIST[self.player1.id];
+    var p2Socket = SOCKET_LIST[self.player2.id];
+
+    // Stops function if a player leaves in the middle of the pause
+    if(p1Socket == undefined || p2Socket == undefined){
+      return;
+    }
+
+    // Init array of things to dodge
+    self.initializeThingsToDodge();
+    self.player1.thingsToDodge = self.thingsToDodge;
+    self.player2.thingsToDodge = self.thingsToDodge;
 
     // Unpause if paused
     self.player1.pause = false;
@@ -123,9 +298,9 @@ var BoxKick = function(p1, p2){
     //Update score here....
 
     if(self.winner == "Player 1"){
-      self.p1Score++;
+      self.metGame.p1Score++;
     } else {
-      self.p2Score++;
+      self.metGame.p2Score++;
     }
 
     // Start next game
@@ -138,8 +313,8 @@ var BoxKick = function(p1, p2){
 // General entity super class.
 var entity = function(){
     var self = {
-      x:Math.floor(Math.random() * 250) + 30,
-      y:Math.floor(Math.random() * 250) + 30,
+      x:0,
+      y:0,
       spdX:0,
       spdY:0,
       id:"",
@@ -181,10 +356,14 @@ var Player = function(id){
   self.pause = false;
   self.instructing = false;
 
+  // BoxKick Stuff
   self.onRight = false;
   self.onLeft = false;
   self.jumping = false;
   self.kicking = false;
+
+  // Dodge This
+  self.thingsToDodge = [];
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -305,19 +484,33 @@ Player.onDisconnect = function(socket){
 }
 
 // Static update function for all Players
-Player.update = function(players){
+Player.update = function(players, gameType){
   var dataPackage = [];
   // Loop through each player in given player array
-  for(var i in players){
-    var player = players[i];
-    if(player != undefined){
-      player.update();
-      dataPackage.push({
-        x:player.x,
-        y:player.y,
-        number:player.number,
-        uniqueId:player.uniqueId,
-      });
+  if(gameType == "BoxKick"){
+    for(var i in players){
+      var player = players[i];
+      if(player != undefined){
+        player.update();
+        dataPackage.push({
+          x:player.x,
+          y:player.y,
+          uniqueId:player.uniqueId,
+        });
+      }
+    }
+  } else if(gameType == "Dodge This"){
+    for(var i in players){
+      var player = players[i];
+      if(player != undefined){
+        player.update();
+        dataPackage.push({
+          x:player.x,
+          y:player.y,
+          uniqueId:player.uniqueId,
+          dodgeArray:player.thingsToDodge,
+        });
+      }
     }
   }
 
@@ -587,6 +780,8 @@ generateGameList = function(p1, p2){
 
   // FOR NOW ONLY ONE GAME, THEREFORE, ONE GAME IN List
   var g1 = BoxKick(p1, p2);
+  var g2 = DodgeGame(p1, p2);
+  tempList.push(g2);
   tempList.push(g1);
 
   p1.gameList = tempList;

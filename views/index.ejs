@@ -111,8 +111,9 @@
         } else {
           img.src = "p2.png";
         }
-        // Draw image in center
         ctx.drawImage(img,data[i].x-16,data[i].y-16);
+        // Draw image in center
+        
       }*/
     } else if(game == "BoxKick"){
       ctx.clearRect(0,0,800,600);
@@ -127,7 +128,18 @@
         // Draw image
         ctx.drawImage(img,data[i].x,data[i].y);
       }
+    } else if(game == "Dodge This"){
+      var img = new Image();
+        if(data[i].uniqueId === uniqueId){
+          img.src = "p1.png";
+        } else {
+          img.src = "p2.png";
+        }
+        // Draw image
+        ctx.drawImage(img,data[i].x,data[i].y);
+      }
     }
+
     
   });
 
