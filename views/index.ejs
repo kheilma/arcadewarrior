@@ -77,7 +77,6 @@
   // Do this stuff when in queue
   socket.on('queue', function(){
   
-    //console.log("In queue!");
     ctx.clearRect(0,0,800,600);
     ctx.fillText("You are in queue.",150,100);
   });
@@ -86,7 +85,7 @@
     ctx.clearRect(0,0,800,600);
     var p1Ready = data.p1;
     var p2Ready = data.p2;
-    //console.log("I'm waiting!");
+
     ctx.fillText("Press space to ready up.",200,100);
     if(p1Ready == true && p2Ready == false){
       ctx.fillText("You: ready",50,200);

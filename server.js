@@ -162,8 +162,8 @@ var BoxKick = function(p1, p2, metaGame){
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
     p2Socket.emit('instructions', {message:self.instructions, type:self.type});
-    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 5000);
-    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 5000);
+    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 3000);
+    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 3000);
     
     self.player1.startedGame = true;
     self.player2.startedGame = true;
@@ -171,7 +171,6 @@ var BoxKick = function(p1, p2, metaGame){
 
   self.finish = function(nextGame){
     //Update score here....
-    console.log("NG: " + nextGame);
     if(self.winner == "Player 1"){
       self.metaGame.p1Score++;
     } else {
@@ -325,15 +324,14 @@ var DodgeGame = function(p1, p2, metaGame){
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
     p2Socket.emit('instructions', {message:self.instructions, type:self.type});
-    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 5000);
-    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 5000);
+    setTimeout(function() {p1Socket.emit('gameType', {type:self.type});}, 3000);
+    setTimeout(function() {p2Socket.emit('gameType', {type:self.type});}, 3000);
     
     self.player1.startedGame = true;
     self.player2.startedGame = true;
   }
 
   self.finish = function(nextGame){
-
     //Update score here....
 
     //Reset thingsToDodge.
@@ -756,14 +754,12 @@ handleCollisions = function(player1, player2){
         // Player 1 above player2
         if(player1.y<player2.y){
           // player1 wins
-          console.log("Player1 wins!!!!");
           player1.game.winner = "Player 1";
           player2.game.winner = "Player 1";
 
         // Player 2 above player1
         } else if(player1.y>player2.y){
           // player2 wins
-          console.log("Player2 wins!!!!");
           player1.game.winner = "Player 2";
           player2.game.winner = "Player 2";
           
@@ -781,11 +777,11 @@ handleCollisions = function(player1, player2){
           }
 
         }
-        
-        setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
-        setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
+
         player1.currGameNum++;
         player2.currGameNum++;
+        setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+        //setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
 
       }
   } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
@@ -798,12 +794,10 @@ handleCollisions = function(player1, player2){
       player1.game.winner = "Player 2";
       player2.game.winner = "Player 2";
 
-      
-      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
-      setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
       player1.currGameNum++;
       player2.currGameNum++;
-
+      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+     // setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
     // Player2 was hit
     } else if(hitDetect(player1,player2) == "p2"){
       player1.pause = true;
@@ -812,11 +806,10 @@ handleCollisions = function(player1, player2){
       player1.game.winner = "Player 1";
       player2.game.winner = "Player 1";
 
-      
-      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
-      setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
       player1.currGameNum++;
       player2.currGameNum++;
+      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+      //setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
     }
 
   }
@@ -890,9 +883,7 @@ generateGameList = function(p1, p2){
   p1.gameList = tempList;
   p2.gameList = tempList;
   p1.game = p1.gameList[0];
-  p2.game = p1.gameList[0];
-
-  console.log("Starting game!!!!");
+  p2.game = p2.gameList[0];
 
   return;
 }
