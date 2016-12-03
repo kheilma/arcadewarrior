@@ -102,6 +102,13 @@
     
   });
   // Drawing related things
+  socket.on('endMatch', function(data){
+    ctx.clearRect(0,0,800,600);
+    var message = data.winner + " won the entire match!";
+    ctx.fillText(message,200,300);
+    socket.disconnect();
+  });
+
   socket.on('pauseOn', function(data){
     var message = data.winner + " won the minigame!";
     ctx.fillText(message,200,300);
@@ -154,7 +161,6 @@
           img.src = "p2.png";
         }
         // Draw image
-        console.log("PRINTING");
         ctx.drawImage(img,data[i].x,data[i].y);
       }
 
@@ -162,7 +168,6 @@
       // No need to draw the Opponent's things to dodge
       //thingsToDodge = thisClient.dodgeArray;
       for(var i = 0; i < thingsToDodge.length; i++){
-        console.log("PRINTING");
         ctx.drawImage(thingToDodge,thingsToDodge[i].x,thingsToDodge[i].y);
       }
       

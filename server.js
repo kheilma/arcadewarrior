@@ -66,23 +66,39 @@ var MetaGame = function(p1, p2){
 
   // If the score is >= 2 (for 3 total minigames)
   // End the match
-  endMatch = function(player){
+  self.endMatch = function(player){
+    var p1 = SOCKET_LIST[self.player1.id];
+    var p2 = SOCKET_LIST[self.player2.id];
+
+    if(p1 == undefined){
+      p2Socket.emit('playerLeft');
+    } else if(p2 == undefined){
+      p1Socket.emit('playerLeft');
+    }
+
+    self.player1.pause = false;
+    self.player2.pause = false;
 
     // Code to end metagame and take client out of the game and back to the main page
+    if(player == "p1"){
+      p1.emit('endMatch', {winner:"You"});
+      p2.emit('endMatch', {winner:"Opponent"});
+    } else {
+      p1.emit('endMatch', {winner:"Opponent"});
+      p2.emit('endMatch', {winner:"You"});
+    }
 
   }
 
   // Called after each minigame ends to see if the score is >=2 (for now)
-  checkIfEnd = function(){
-    if(p1Score >= 2){
-      endMatch(p1);
-      return true;
-    } else if(p2Score >= 2){
-      endMatch(p2);
-      return true;
-    }
+  self.checkIfEnd = function(){
+    if(self.p1Score >= 2){
+      return "p1";
+    } else if(self.p2Score >= 2){
+      return "p2";
+    } 
 
-    return false;
+    return "none";
   }
 
   return self;
@@ -127,6 +143,9 @@ var BoxKick = function(p1, p2, metaGame){
       return;
     }
 
+    self.player1.game = self;
+    self.player2.game = self;
+
     // Unpause if paused
     self.player1.pause = false;
     self.player2.pause = false;
@@ -152,11 +171,17 @@ var BoxKick = function(p1, p2, metaGame){
 
   self.finish = function(nextGame){
     //Update score here....
-
+    console.log("NG: " + nextGame);
     if(self.winner == "Player 1"){
       self.metaGame.p1Score++;
     } else {
       self.metaGame.p2Score++;
+    }
+
+    if(nextGame == undefined || self.metaGame.checkIfEnd()!="none"){
+      // Last Minigame!!!!
+      self.metaGame.endMatch(self.metaGame.checkIfEnd());
+      return;
     }
 
     // Start next game
@@ -276,6 +301,9 @@ var DodgeGame = function(p1, p2, metaGame){
       return;
     }
 
+    self.player1.game = self;
+    self.player2.game = self;
+
     // Init array of things to dodge
     self.initializeThingsToDodge();
     self.player1.thingsToDodge = self.thingsToDodge;
@@ -288,11 +316,11 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player2.instructing = true;
 
     // Init player positions
-    self.player1.x = 56;
-    self.player1.y = 500;
+    self.player1.x = 336;
+    self.player1.y = 268;
 
-    self.player2.x = 700;
-    self.player2.y = 500;
+    self.player2.x = 400;
+    self.player2.y = 268;
 
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
@@ -305,6 +333,7 @@ var DodgeGame = function(p1, p2, metaGame){
   }
 
   self.finish = function(nextGame){
+
     //Update score here....
 
     //Reset thingsToDodge.
@@ -314,6 +343,12 @@ var DodgeGame = function(p1, p2, metaGame){
       self.metaGame.p1Score++;
     } else {
       self.metaGame.p2Score++;
+    }
+
+    if(nextGame == undefined || self.metaGame.checkIfEnd()!="none"){
+      // Last Minigame!!!!
+      self.metaGame.endMatch(self.metaGame.checkIfEnd());
+      return;
     }
 
     // Start next game
@@ -366,6 +401,7 @@ var Player = function(id){
   self.metaGame = undefined;
   self.gameList = [];
   self.game = "none";
+  self.currGameNum = 0;
   self.startedGame = false;
   self.pause = false;
   self.instructing = false;
@@ -745,9 +781,11 @@ handleCollisions = function(player1, player2){
           }
 
         }
-
-        setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-        setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+        
+        setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+        setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
+        player1.currGameNum++;
+        player2.currGameNum++;
 
       }
   } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
@@ -760,8 +798,11 @@ handleCollisions = function(player1, player2){
       player1.game.winner = "Player 2";
       player2.game.winner = "Player 2";
 
-      setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-      setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+      
+      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+      setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
+      player1.currGameNum++;
+      player2.currGameNum++;
 
     // Player2 was hit
     } else if(hitDetect(player1,player2) == "p2"){
@@ -771,8 +812,11 @@ handleCollisions = function(player1, player2){
       player1.game.winner = "Player 1";
       player2.game.winner = "Player 1";
 
-      setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
-      setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+      
+      setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
+      setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
+      player1.currGameNum++;
+      player2.currGameNum++;
     }
 
   }
