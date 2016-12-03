@@ -154,9 +154,9 @@ var BoxKick = function(p1, p2, metaGame){
     //Update score here....
 
     if(self.winner == "Player 1"){
-      self.metGame.p1Score++;
+      self.metaGame.p1Score++;
     } else {
-      self.metGame.p2Score++;
+      self.metaGame.p2Score++;
     }
 
     // Start next game
@@ -179,8 +179,12 @@ var DodgeGame = function(p1, p2, metaGame){
 
   self.thingsToDodge = [];
 
-  self.genRandom = function(min, max){
+  self.genRandomPos = function(min, max){
     return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  self.genRandom = function(min, max){
+    return Math.random() * (max - min) + min;
   }
 
   self.updateThingsToDodge = function(){
@@ -191,7 +195,7 @@ var DodgeGame = function(p1, p2, metaGame){
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 25;
+    var numOfThings = 10;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
@@ -201,66 +205,65 @@ var DodgeGame = function(p1, p2, metaGame){
       var decide = Math.floor((Math.random() * 8) + 1);
       // Upper left
       if(decide == 1){
-        thing.x = self.genRandom(-50,-200); // Generate from -50 -> -200
-        thing.y = self.genRandom(-50,-200); // Generate from -50 -> -200
+        thing.x = self.genRandomPos(-200,-600); 
+        thing.y = self.genRandomPos(-200,-600);
 
-        thing.spdX = self.genRandom(4,10); // Generate a value between 4 and 10
-        thing.spdY = self.genRandom(4,10); // Generate a value between 4 and 10
+        thing.spdX = self.genRandom(1,3); 
+        thing.spdY = self.genRandom(1,3); 
       // Bottom left
       } else if(decide == 2){
-        thing.x = self.genRandom(-50,-200);  // Generate from -50 -> -200
-        thing.y = self.genRandom(650,800); // Generate from 650 -> 800
+        thing.x = self.genRandomPos(-200,-600); 
+        thing.y = self.genRandomPos(800,1200); 
 
-        thing.spdX = self.genRandom(4,10); // Generate a value between 4 and 10
-        thing.spdY = self.genRandom(-4,-10); // Generate a value between -4 and -10
+        thing.spdX = self.genRandom(1,3); 
+        thing.spdY = self.genRandom(-1,-3);
       // Upper right
       } else if(decide == 3){
-        thing.x = self.genRandom(850,1000); // Generate from 850 -> 1000
-        thing.y = self.genRandom(-50,-200); // Generate from -50 -> -200
+        thing.x = self.genRandomPos(1000,1400); 
+        thing.y = self.genRandomPos(-200,-600); 
 
-        thing.spdX = self.genRandom(-4,-10); // Generate a value between -4 and -10
-        thing.spdY = self.genRandom(4,10); // Generate a value between 4 and 10
+        thing.spdX = self.genRandom(-1,-3); 
+        thing.spdY = self.genRandom(1,3); 
       // Bottom right
       } else if(decide == 4){
-        thing.x = self.genRandom(850,1000); // Generate from 850 -> 1000
-        thing.y = self.genRandom(650,800); // Generate from 650 -> 800
+        thing.x = self.genRandomPos(1000,1400); 
+        thing.y = self.genRandomPos(800,1200); 
 
-        thing.spdX = self.genRandom(-4,-10); // Generate a value between -4 and -10
-        thing.spdY = self.genRandom(-4,-10); // Generate a value between -4 and -10
+        thing.spdX = self.genRandom(-1,-3); 
+        thing.spdY = self.genRandom(-1,-3); 
       // Top
       } else if(decide == 5){
-        thing.x = self.genRandom(50,750); // Generate from 50 -> 750
-        thing.y = self.genRandom(-50,-200); // Generate from -50 -> -200
+        thing.x = self.genRandomPos(50,750); 
+        thing.y = self.genRandomPos(-200,-600); 
 
         thing.spdX = 0;
-        thing.spdY = self.genRandom(4,10); // Generate a value between 4 and 10
+        thing.spdY = self.genRandom(1,3);
       // Bottom
       } else if(decide == 6){
-        thing.x = self.genRandom(50,750); // Generate from 50 -> 750
-        thing.y = self.genRandom(650,800); // Generate from 650 -> 800
+        thing.x = self.genRandomPos(50,750);
+        thing.y = self.genRandomPos(800,1200);
 
         thing.spdX = 0;
-        thing.spdY = self.genRandom(-4,-10); // Generate a value between -4 and -10
+        thing.spdY = self.genRandom(-1,-3);
       // Left
       } else if(decide == 7){
-        thing.x = self.genRandom(-50,-200); // Generate from -50 -> -200
-        thing.y = self.genRandom(50,550); // Generate from 50 -> 550
+        thing.x = self.genRandomPos(-200,-600);
+        thing.y = self.genRandomPos(50,550);
 
-        thing.spdX = self.genRandom(4,10); // Generate a value between 4 and 10
+        thing.spdX = self.genRandom(1,3);
         thing.spdY = 0;
       // Right
       } else {
-        thing.x = self.genRandom(850,1000); // Generate from 850 -> 1000
-        thing.y = self.genRandom(50,550); // Generate from 50 -> 550
+        thing.x = self.genRandomPos(1000,1400);
+        thing.y = self.genRandomPos(50,550);
 
-        thing.spdX = self.genRandom(-4,-10); // Generate a value between -4 and -10
+        thing.spdX = self.genRandom(-1,-3);
         thing.spdY = 0;
       }
 
       // After everything is generated for the individual thing, we push it to the array
       self.thingsToDodge.push(thing);
     }
-
   }
 
   self.startGame = function(){
@@ -304,10 +307,13 @@ var DodgeGame = function(p1, p2, metaGame){
   self.finish = function(nextGame){
     //Update score here....
 
+    //Reset thingsToDodge.
+    self.thingsToDodge = [];
+
     if(self.winner == "Player 1"){
-      self.metGame.p1Score++;
+      self.metaGame.p1Score++;
     } else {
-      self.metGame.p2Score++;
+      self.metaGame.p2Score++;
     }
 
     // Start next game
@@ -357,6 +363,7 @@ var Player = function(id){
   self.ready = false;
   self.uniqueId = -1;
 
+  self.metaGame = undefined;
   self.gameList = [];
   self.game = "none";
   self.startedGame = false;
@@ -634,7 +641,7 @@ setInterval(function(){
                 player1.game.startGame();
                 player2.game.startGame();
               }
-              dataPackage = Player.update(players);
+              dataPackage = Player.update(players, player1.game.type);
               handleCollisions(player1,player2);
             
               // Send the data to the respective players
@@ -705,7 +712,7 @@ setInterval(function(){
 handleCollisions = function(player1, player2){
 
   if(player1.game.type == "BoxKick" || player2.game.type == "BoxKick"){
-      if(hitDetect(player1,player2)){
+      if(hitDetect(player1,player2)=="hit"){
 
         player1.pause = true;
         player2.pause = true;
@@ -743,11 +750,42 @@ handleCollisions = function(player1, player2){
         setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
 
       }
+  } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
+
+    // Player1 was hit
+    if(hitDetect(player1,player2) == "p1"){
+      player1.pause = true;
+      player2.pause = true;
+
+      player1.game.winner = "Player 2";
+      player2.game.winner = "Player 2";
+
+      setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
+      setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+
+    // Player2 was hit
+    } else if(hitDetect(player1,player2) == "p2"){
+      player1.pause = true;
+      player2.pause = true;
+
+      player1.game.winner = "Player 1";
+      player2.game.winner = "Player 1";
+
+      setTimeout(function() {player1.game.finish(player1.gameList[0]);}, 3000);
+      setTimeout(function() {player2.game.finish(player2.gameList[0]);}, 3000);
+    }
+
   }
 
 }
 
 hitDetect = function(player1, player2){
+
+  // Set x and y to the center of each box
+  var p1x = player1.x+32;
+  var p1y = player1.y+32;
+  var p2x = player2.x+32;
+  var p2y = player2.y+32;
 
   // Handle who is on which side
   if(player1.game.type == "BoxKick" || player2.game.type == "BoxKick"){
@@ -766,32 +804,45 @@ hitDetect = function(player1, player2){
         player2.onRight = false;
         player2.onLeft = true;
       }
-  }
 
-  // Set x and y to the center of each box
-  var p1x = player1.x+32;
-  var p1y = player1.y+32;
-  var p2x = player2.x+32;
-  var p2y = player2.y+32;
+      if(p1x+32 >= p2x-32 && p1x-32 <= p2x+32 && p1y+32 >= p2y-32 && p1y-32 <= p2y+32){
+        return "hit";
+      }
 
-  if(p1x+32 >= p2x-32 && p1x-32 <= p2x+32 && p1y+32 >= p2y-32 && p1y-32 <= p2y+32){
-    return true;
+      return undefined;
+  } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
+    var thingsToDodge = player1.game.thingsToDodge;
+
+    for(var i = 0; i < thingsToDodge.length; i++){
+      var boxX = thingsToDodge[i].x+16;
+      var boxY = thingsToDodge[i].y+16;
+      
+      if(p1x+32 >= boxX-16 && p1x-32 <= boxX+16 && p1y+32 >= boxY-16 && p1y-32 <= boxY+16){
+        return "p1";
+      } else if(p2x+32 >= boxX-16 && p2x-32 <= boxX+16 && p2y+32 >= boxY-16 && p2y-32 <= boxY+16){
+        return "p2";
+      }
+
+    }
+
+    return undefined;
   }
-  
-  return false;
 
 }
 
 generateGameList = function(p1, p2){
 
   var tempList = [];
+  var mg = MetaGame(p1,p2);
 
   // FOR NOW ONLY ONE GAME, THEREFORE, ONE GAME IN List
-  var g1 = BoxKick(p1, p2);
-  var g2 = DodgeGame(p1, p2);
+  var g1 = BoxKick(p1, p2, mg);
+  var g2 = DodgeGame(p1, p2, mg);
   tempList.push(g2);
   tempList.push(g1);
 
+  p1.metaGame = mg;
+  p2.metaGame = mg;
   p1.gameList = tempList;
   p2.gameList = tempList;
   p1.game = p1.gameList[0];
