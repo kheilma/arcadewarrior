@@ -46,10 +46,22 @@
   ctx.font = '30px Arial';
   // Creats socket connection to server
   var socket = io.connect();
+
   var uniqueId = Math.random();
   var game = "none";
+
+  // For boxkick
   var boxKickBG = new Image();
   boxKickBG.src = "bkbg.png";
+
+  //For dodgeThis
+  var thingToDodge = new Image();
+  thingToDodge.src = "thingToDodge.png";
+
+  var thingToDodgeBG = new Image();
+  thingToDodgeBG.src = "thingToDodgeBG.png";
+
+
   // Update game type
   socket.on('gameType', function(data){
     game = data.type;
@@ -129,15 +141,30 @@
         ctx.drawImage(img,data[i].x,data[i].y);
       }
     } else if(game == "Dodge This"){
-      var img = new Image();
+      ctx.clearRect(0,0,800,600);
+      ctx.drawImage(thingToDodgeBG,0,0);
+      var thingsToDodge = [];
+      // For each player data
+      for(var i = 0; i < data.length; i++){
+        var img = new Image();
         if(data[i].uniqueId === uniqueId){
           img.src = "p1.png";
+          thingsToDodge = data[i].dodgeArray;
         } else {
           img.src = "p2.png";
         }
         // Draw image
         ctx.drawImage(img,data[i].x,data[i].y);
       }
+
+      // Draw the clients things to dodge
+      // No need to draw the Opponent's things to dodge
+      //thingsToDodge = thisClient.dodgeArray;
+      for(var i = 0; i < thingsToDodge.length; i++){
+        console.log("PRINTING");
+        ctx.drawImage(thingToDodge,thingsToDodge[i].x,thingsToDodge[i].y);
+      }
+      
     }
 
     

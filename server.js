@@ -183,6 +183,13 @@ var DodgeGame = function(p1, p2, metaGame){
     return Math.floor(Math.random() * (max - min) + min);
   }
 
+  self.updateThingsToDodge = function(){
+    for(var i = 0; i < self.thingsToDodge.length; i++){
+      self.thingsToDodge[i].x += self.thingsToDodge[i].spdX;
+      self.thingsToDodge[i].y += self.thingsToDodge[i].spdY;
+    }
+  }
+
   self.initializeThingsToDodge = function(){
     var numOfThings = 25;
 
@@ -502,6 +509,7 @@ Player.update = function(players, gameType){
   } else if(gameType == "Dodge This"){
     for(var i in players){
       var player = players[i];
+      player.game.updateThingsToDodge();
       if(player != undefined){
         player.update();
         dataPackage.push({
