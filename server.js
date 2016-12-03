@@ -72,9 +72,11 @@ var MetaGame = function(p1, p2){
     var p2 = SOCKET_LIST[self.player2.id];
 
     if(p1 == undefined){
-      p2Socket.emit('playerLeft');
+      p2.emit('playerLeft');
+      return;
     } else if(p2 == undefined){
-      p1Socket.emit('playerLeft');
+      p1.emit('playerLeft');
+      return;
     }
 
     self.player1.pause = false;
