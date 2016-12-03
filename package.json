@@ -1,16 +1,22 @@
 {
   "name": "node-authentication",
   "main": "server.js",
-  "dependencies" : {
-    "express" : "~3.4.4", 			
-    "ejs" : "~0.8.5", 				
-    "mongoose" : "~3.8.1", 			
-    "passport" : "~0.1.17", 		
-    "passport-local" : "~0.1.6", 	
-    "passport-facebook" : "~1.0.2", 
-    "passport-twitter" : "~1.0.2", 	
-    "passport-google-oauth" : "~0.1.5",
-    "connect-flash" : "~0.1.1", 	
-    "bcrypt-nodejs" : "latest" 		
+  "dependencies": {
+    "bcrypt-nodejs": "latest",
+    "cfenv": "^1.0.3",
+    "connect-flash": "~0.1.1",
+    "ejs": "~0.8.5",
+    "express": "~3.4.4",
+    "mongoose": "~3.8.1",
+    "passport": "~0.1.17",
+    "passport-facebook": "~1.0.2",
+    "passport-google-oauth": "~0.1.5",
+    "passport-local": "~0.1.6",
+    "passport-twitter": "~1.0.2",
+    "socket.io": "^1.7.1"
+  },
+  "devDependencies": {
+    "check-dependencies": "^1.0.1",
+    "socket.io": "^1.7.1"
   }
 }

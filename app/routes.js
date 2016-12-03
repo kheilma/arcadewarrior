@@ -1,7 +1,9 @@
 module.exports = function(app, passport) {
 
-	app.get('/', function(req, res) {
-		res.render('index.ejs'); 
+	app.get('/', isLoggedIn, function(req, res) {
+		res.render('index.ejs', {
+			user: req.user
+		}); 
 	});
 
 
@@ -54,5 +56,5 @@ function isLoggedIn(req, res, next) {
 		return next();
 
 
-	res.redirect('/');
+	res.redirect('/login');
 }
