@@ -202,23 +202,34 @@ var DodgeGame = function(p1, p2, metaGame){
 
   self.thingsToDodge = [];
 
+  // randomly gen whole numberes
   self.genRandomPos = function(min, max){
     return Math.floor(Math.random() * (max - min) + min);
   }
 
+  // randomly gen real numbers
   self.genRandom = function(min, max){
     return Math.random() * (max - min) + min;
   }
 
+  // Update position of the things to dodge
   self.updateThingsToDodge = function(){
     for(var i = 0; i < self.thingsToDodge.length; i++){
       self.thingsToDodge[i].x += self.thingsToDodge[i].spdX;
       self.thingsToDodge[i].y += self.thingsToDodge[i].spdY;
+
+      // Check boundaries on each thing
+      if(self.thingsToDodge[i].x >= 2000 || self.thingsToDodge[i].x <= -2000 
+      || self.thingsToDodge[i].y>=2000 || self.thingsToDodge[i].y >= 2000){
+        self.thingsToDodge.splice(i, 1);
+      }
+
     }
+
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 10;
+    var numOfThings = 5;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
@@ -303,7 +314,7 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player2.game = self;
 
     // Init array of things to dodge
-    self.initializeThingsToDodge();
+    setInterval(function() {self.initializeThingsToDodge();}, 5000);
     self.player1.thingsToDodge = self.thingsToDodge;
     self.player2.thingsToDodge = self.thingsToDodge;
 
@@ -813,7 +824,7 @@ handleCollisions = function(player1, player2){
   } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
 
     // Player1 was hit
-    if(hitDetect(player1,player2) == "p1"){
+    /*if(hitDetect(player1,player2) == "p1"){
       player1.pause = true;
       player2.pause = true;
 
@@ -836,7 +847,7 @@ handleCollisions = function(player1, player2){
       player2.currGameNum++;
       setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
       //setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
-    }
+    }*/
 
   }
 
