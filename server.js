@@ -151,6 +151,17 @@ var BoxKick = function(p1, p2, metaGame){
     self.player1.instructing = true;
     self.player2.instructing = true;
 
+    //Reset inputs
+    self.player1.pressingDown = false;
+    self.player1.pressingUp= false;
+    self.player1.pressingLeft = false;
+    self.player1.pressingRight = false;
+
+    self.player2.pressingDown = false;
+    self.player2.pressingUp= false;
+    self.player2.pressingLeft = false;
+    self.player2.pressingRight = false;
+
     // Init player positions
     self.player1.x = 36;
     self.player1.y = 500;
@@ -323,6 +334,17 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player2.pause = false;
     self.player1.instructing = true;
     self.player2.instructing = true;
+
+    //Reset inputs
+    self.player1.pressingDown = false;
+    self.player1.pressingUp= false;
+    self.player1.pressingLeft = false;
+    self.player1.pressingRight = false;
+
+    self.player2.pressingDown = false;
+    self.player2.pressingUp= false;
+    self.player2.pressingLeft = false;
+    self.player2.pressingRight = false;
 
     // Init player positions
     self.player1.x = 336;
