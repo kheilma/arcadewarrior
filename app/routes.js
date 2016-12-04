@@ -1,12 +1,12 @@
 module.exports = function(app, passport) {
 
-	app.get('/', isLoggedIn, function(req, res) {
-		res.render('index.ejs', {
-			user: req.user
-		}); 
-		app.locals({
+	app.get('/', /*isLoggedIn,*/ function(req, res) {
+		res.render('index.ejs');//, {
+			//user: req.user
+		//}); 
+		/*app.locals({
 			email: req.user.email
-		});
+		});*/
 		//console.log(req.user);
 		//console.log("dsaadssad");
 	});

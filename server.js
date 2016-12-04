@@ -260,12 +260,32 @@ var Catch = function(p1, p2, metaGame){
     // For each thing to catch
     for(var i = 0; i < numOfThings; i++){
       var catchItem = entity();
+      catchItem.image = "";
 
-        catchItem.x = self.genRandomPos(50,750); 
-        catchItem.y = -100;
+      var chooseImage = self.genRandomPos(1,4);
 
-        catchItem.spdX =  0; 
-        catchItem.spdY = self.genRandom(0.5,2); 
+      if(chooseImage == 1){
+
+        catchItem.image = "apple"; 
+
+      } else if(chooseImage == 2){
+
+        catchItem.image = "cherry";
+
+      } else if(chooseImage == 3){
+
+        catchItem.image = "watermelon"; 
+
+      } else {
+
+        catchItem.image = "cupcake"; 
+      }
+
+      catchItem.x = self.genRandomPos(50,750); 
+      catchItem.y = -100;
+
+      catchItem.spdX =  0; 
+      catchItem.spdY = self.genRandom(0.5,2); 
 
       // After everything is generated for the individual item, we push it to the array
       self.catchArray.push(catchItem);
