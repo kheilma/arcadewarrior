@@ -12,7 +12,7 @@ var LocalStrategy   = require('passport-local').Strategy;
 var User       		= require('./app/models/user');
 
 
-mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
+//mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
 
 
 
@@ -240,7 +240,7 @@ var DodgeGame = function(p1, p2, metaGame){
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 5;
+    var numOfThings = 8;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
