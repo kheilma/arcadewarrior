@@ -9,7 +9,7 @@ module.exports = function(app, passport) {
 		});
 		console.log(req.user);
 		console.log("dsaadssad");
-		});
+	});
 
 
 	app.get('/login', function(req, res) {
