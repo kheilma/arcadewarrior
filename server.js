@@ -39,7 +39,7 @@ app.configure(function() {
 require('./app/routes.js')(app, passport); 
 
 server.listen(port);
-console.log('The magic happens on port ' + port);
+//console.log('The magic happens on port ' + port);
 
 app.use(express.static(__dirname + '/public'));
 
@@ -68,13 +68,13 @@ var MetaGame = function(p1, p2){
   // If the score is >= 2 (for 3 total minigames)
   // End the match
   self.endMatch = function(player){
-          User.findOne({ "email": "hehe" }, function(err, user) {
+          User.findOne({ 'local.email' : 'hehe' }, function(err, user) {
       if (err) throw err;
 
   // object of the user
-      console.log(app.locals.email);
-      console.log("test");
-      console.log(user);
+      //console.log(app.locals.email);
+      //console.log("test");
+      //console.log(user);
     });
     var p1 = SOCKET_LIST[self.player1.id];
     var p2 = SOCKET_LIST[self.player2.id];
@@ -96,6 +96,9 @@ var MetaGame = function(p1, p2){
     }
 
   }
+  
+  
+  
 
   // Called after each minigame ends to see if the score is >=2 (for now)
   self.checkIfEnd = function(){
@@ -650,12 +653,12 @@ io.sockets.on('connection', function(socket){
 
   socket.on('debug', function(message){
 
-    console.log("From client: " + message);
+    //console.log("From client: " + message);
 
   });
 
   queue.push(player);
-  console.log("Queue size after connection: " + queue.length);
+  //console.log("Queue size after connection: " + queue.length);
   socket.emit('queue');
 
   // Take two players out of the queue, add them to a room
@@ -664,6 +667,23 @@ io.sockets.on('connection', function(socket){
   }
 
   Player.onConnect(socket);
+
+      socket.on('ivewon', function(){
+          User.findOne({ 'local.email' : 'hehe' }, function(err, user) {
+      if (err) throw err;
+
+  // object of the user
+      //console.log(app.locals.email);
+      //console.log("test");
+      console.log(user);
+      user.userWins = 2;
+        user.save(function(err) {
+                });
+    });
+      //user.userWins = 2;
+        //user.save(function(err) {
+               // });
+  });
 
   // When a player disconnects, remove them from the socket list
   socket.on('disconnect', function(){
@@ -1031,5 +1051,5 @@ handleRoom = function(queue){
     p1Socket.join(roomToJoin);
     p2Socket.join(roomToJoin);
 
-    console.log("Joined room: " + roomToJoin);
+    //console.log("Joined room: " + roomToJoin);
 }
