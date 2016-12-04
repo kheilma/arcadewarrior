@@ -1174,7 +1174,7 @@ generateGameList = function(p1, p2){
   var g3 = Catch(p1, p2, mg);
 
   for(var i = 0; i < mg.numOfGames; i++){
-    var rand = Math.floor(Math.random() * 3) + 1;
+    var rand = Math.floor((Math.random() * 3) + 1);
 
     if(rand == 1){
       tempList.push(g1);
