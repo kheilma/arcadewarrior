@@ -151,6 +151,17 @@ var BoxKick = function(p1, p2, metaGame){
     self.player1.instructing = true;
     self.player2.instructing = true;
 
+    //Reset inputs
+    self.player1.pressingDown = false;
+    self.player1.pressingUp= false;
+    self.player1.pressingLeft = false;
+    self.player1.pressingRight = false;
+
+    self.player2.pressingDown = false;
+    self.player2.pressingUp= false;
+    self.player2.pressingLeft = false;
+    self.player2.pressingRight = false;
+
     // Init player positions
     self.player1.x = 36;
     self.player1.y = 500;
@@ -202,23 +213,34 @@ var DodgeGame = function(p1, p2, metaGame){
 
   self.thingsToDodge = [];
 
+  // randomly gen whole numberes
   self.genRandomPos = function(min, max){
     return Math.floor(Math.random() * (max - min) + min);
   }
 
+  // randomly gen real numbers
   self.genRandom = function(min, max){
     return Math.random() * (max - min) + min;
   }
 
+  // Update position of the things to dodge
   self.updateThingsToDodge = function(){
     for(var i = 0; i < self.thingsToDodge.length; i++){
       self.thingsToDodge[i].x += self.thingsToDodge[i].spdX;
       self.thingsToDodge[i].y += self.thingsToDodge[i].spdY;
+
+      // Check boundaries on each thing
+      if(self.thingsToDodge[i].x >= 2000 || self.thingsToDodge[i].x <= -2000 
+      || self.thingsToDodge[i].y>=2000 || self.thingsToDodge[i].y >= 2000){
+        self.thingsToDodge.splice(i, 1);
+      }
+
     }
+
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 10;
+    var numOfThings = 5;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
@@ -303,7 +325,7 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player2.game = self;
 
     // Init array of things to dodge
-    self.initializeThingsToDodge();
+    setInterval(function() {self.initializeThingsToDodge();}, 5000);
     self.player1.thingsToDodge = self.thingsToDodge;
     self.player2.thingsToDodge = self.thingsToDodge;
 
@@ -312,6 +334,17 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player2.pause = false;
     self.player1.instructing = true;
     self.player2.instructing = true;
+
+    //Reset inputs
+    self.player1.pressingDown = false;
+    self.player1.pressingUp= false;
+    self.player1.pressingLeft = false;
+    self.player1.pressingRight = false;
+
+    self.player2.pressingDown = false;
+    self.player2.pressingUp= false;
+    self.player2.pressingLeft = false;
+    self.player2.pressingRight = false;
 
     // Init player positions
     self.player1.x = 336;
@@ -445,6 +478,26 @@ var Player = function(id){
         self.spdY = self.maxSpeed;
       } else {
         self.spdY = 0;
+      }
+
+      if(self.x>=800-64){
+
+        self.x = 800-64;
+
+      } else if(self.x<=0){
+
+        self.x = 0;
+
+      }
+
+      if(self.y>=600-64){
+
+        self.x = 600-64;
+
+      } else if(self.y<=0){
+
+        self.y = 0;
+
       }
     // If playing BoxKick
     } else if(self.game.type=="BoxKick"){
