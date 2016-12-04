@@ -8,10 +8,11 @@ var passport = require('passport');
 var flash    = require('connect-flash');
 var server = require('http').Server(app);
 var configDB = require('./config/database.js');
+var LocalStrategy   = require('passport-local').Strategy;
+var User       		= require('./app/models/user');
 
 
-
-//mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
+mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
 
 
 
@@ -27,7 +28,7 @@ app.configure(function() {
 	app.set('view engine', 'ejs'); 
 
 	// required for passport
-	app.use(express.session({ secret: 'ilovescotchscotchyscotchscotch' }));
+	app.use(express.session({ secret: 'everybodylovesraymond' }));
 	app.use(passport.initialize());
 	app.use(passport.session()); 
 	app.use(flash()); 
@@ -70,10 +71,8 @@ var MetaGame = function(p1, p2){
     var p1 = SOCKET_LIST[self.player1.id];
     var p2 = SOCKET_LIST[self.player2.id];
 
-    if(p1 == undefined){
-      p2Socket.emit('playerLeft');
-    } else if(p2 == undefined){
-      p1Socket.emit('playerLeft');
+    if(p1 == undefined || p2 == undefined){
+      return;
     }
 
     self.player1.pause = false;
@@ -336,6 +335,13 @@ var DodgeGame = function(p1, p2, metaGame){
 
     //Reset thingsToDodge.
     self.thingsToDodge = [];
+
+    User.find({}, function(err, users) {
+  if (err) throw err;
+
+  // object of all the users
+  console.log(users);
+});
 
     if(self.winner == "Player 1"){
       self.metaGame.p1Score++;

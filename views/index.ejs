@@ -12,7 +12,6 @@
 <li> <a href = "/login">Login</a></li>
 <li> <a href = "/profile">Profile</a></li>
 <li> <a href = "/signup">Sign Up</a></li>
-<li> <a href = "/game">Play</a></li>
 </ul>
 </div>
 <div class = "container-flud" id = "centered">
@@ -33,6 +32,11 @@
     </div>
     </div>
     </div>
+    <p id = 'txt'>
+      Welcome
+      <%= user.local.email %><br>
+      </p>
+    <button type = "button" id = "Playbutton" onClick = "mySocketLoad()">Play Now </button>
 </body>
 </html>
 
@@ -42,9 +46,13 @@
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
 <script>
+  // Creats socket connection to server
+  function mySocketLoad() {
+    //var LocalStrategy   = require('passport-local').Strategy;
+    //var User       		= require('../app/models/user');
+  document.getElementById('Playbutton').remove();
   var ctx = document.getElementById("ctx").getContext("2d");
   ctx.font = '30px Arial';
-  // Creats socket connection to server
   var socket = io.connect();
 
   var uniqueId = Math.random();
@@ -114,6 +122,9 @@
   });
   socket.on('playerLeft', function(){
     ctx.fillText("Other player has left. Sorry.",100,500);
+    socket.disconnect();
+    document.getElementById('Playbutton').add();
+
   });
   socket.on('clearScreen', function(){
     ctx.clearRect(0,0,800,600);
@@ -213,6 +224,10 @@
       // Space key
     }
   }
+  }
+
+
+  
   </script>
   <script src="js/Minigame.js"></script>
   <script src="js/BoxKick.js"></script>
