@@ -246,7 +246,7 @@ var Catch = function(p1, p2, metaGame){
       self.catchArray[i].y += self.catchArray[i].spdY;
 
       // Check boundaries on each item
-      if(self.catchArray[i].y>=536){
+      if(self.catchArray[i].y>=570){
         self.catchArray.splice(i, 1);
       }
 
@@ -302,6 +302,7 @@ var Catch = function(p1, p2, metaGame){
       return;
     }
 
+    self.catchArray = [];
     // Init array of things to dodge
     setInterval(function() {self.initializeCatchArray();}, 3000);
     self.player1.catchArray = self.catchArray;
@@ -513,6 +514,7 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player1.game = self;
     self.player2.game = self;
 
+    self.thingsToDodge = [];
     // Init array of things to dodge
     setInterval(function() {self.initializeThingsToDodge();}, 5000);
     self.player1.thingsToDodge = self.thingsToDodge;
