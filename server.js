@@ -12,7 +12,7 @@ var LocalStrategy   = require('passport-local').Strategy;
 var User       		= require('./app/models/user');
 
 
-mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
+//mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
 
 
 
@@ -445,6 +445,26 @@ var Player = function(id){
         self.spdY = self.maxSpeed;
       } else {
         self.spdY = 0;
+      }
+
+      if(self.x>=800-64){
+
+        self.x = 800-64;
+
+      } else if(self.x<=0){
+
+        self.x = 0;
+
+      }
+
+      if(self.y>=600-64){
+
+        self.x = 600-64;
+
+      } else if(self.y<=0){
+
+        self.y = 0;
+
       }
     // If playing BoxKick
     } else if(self.game.type=="BoxKick"){
