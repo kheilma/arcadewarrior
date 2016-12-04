@@ -7,8 +7,8 @@ module.exports = function(app, passport) {
 		app.locals({
 			email: req.user.email
 		});
-		console.log(req.user);
-		console.log("dsaadssad");
+		//console.log(req.user);
+		//console.log("dsaadssad");
 	});
 
 
