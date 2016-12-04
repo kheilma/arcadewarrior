@@ -63,7 +63,10 @@ var MetaGame = function(p1, p2){
     p2Score:0,
     player1:p1,
     player2:p2,
+    numOfGames:5,
   }
+
+  var winCondition = self.numOfGames-2;
 
   // If the score is >= 2 (for 3 total minigames)
   // End the match
@@ -91,9 +94,9 @@ var MetaGame = function(p1, p2){
 
   // Called after each minigame ends to see if the score is >=3 (for now)
   self.checkIfEnd = function(){
-    if(self.p1Score >= 3){
+    if(self.p1Score >= winCondition){
       return "p1";
-    } else if(self.p2Score >= 3){
+    } else if(self.p2Score >= winCondition){
       return "p2";
     } 
 
@@ -160,6 +163,11 @@ var BoxKick = function(p1, p2, metaGame){
     self.player2.pressingUp= false;
     self.player2.pressingLeft = false;
     self.player2.pressingRight = false;
+
+    self.player1.spdX = 0;
+    self.player1.spdY = 0;
+    self.player2.spdX = 0;
+    self.player2.spdY = 0;
 
     // Init player positions
     self.player1.x = 36;
@@ -287,6 +295,11 @@ var Catch = function(p1, p2, metaGame){
     self.player2.pressingUp= false;
     self.player2.pressingLeft = false;
     self.player2.pressingRight = false;
+
+    self.player1.spdX = 0;
+    self.player1.spdY = 0;
+    self.player2.spdX = 0;
+    self.player2.spdY = 0;
 
     // Init player positions
     self.player1.x = 336;
@@ -470,6 +483,11 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player2.pressingUp= false;
     self.player2.pressingLeft = false;
     self.player2.pressingRight = false;
+
+    self.player1.spdX = 0;
+    self.player1.spdY = 0;
+    self.player2.spdX = 0;
+    self.player2.spdY = 0;
 
     // Init player positions
     self.player1.x = 336;
@@ -778,6 +796,7 @@ Player.update = function(players, gameType){
         dataPackage.push({
           x:player.x,
           y:player.y,
+          catchNum:player.catchNum,
           uniqueId:player.uniqueId,
           catchArray:player.catchArray,
         });
@@ -1037,7 +1056,9 @@ handleCollisions = function(player1, player2){
   } else if(player1.game.type == "Catch" || player2.game.type == "Catch"){
 
     // Player1 was hit
-    if(hitDetect(player1,player2) == "p1"){
+    var phit = hitDetect(player1,player2)
+
+    if(phit== "p1"){
       player1.catchNum++;
 
       if(player1.catchNum>=10){
@@ -1053,7 +1074,7 @@ handleCollisions = function(player1, player2){
       }
 
     // Player2 was hit
-    } else if(hitDetect(player1,player2) == "p2"){
+    }else if(phit == "p2"){
       player2.catchNum++;
 
       if(player2.catchNum>=10){
@@ -1143,7 +1164,7 @@ hitDetect = function(player1, player2){
 }
 
 generateGameList = function(p1, p2){
-
+ 
   var tempList = [];
   var mg = MetaGame(p1,p2);
 
@@ -1151,9 +1172,19 @@ generateGameList = function(p1, p2){
   var g1 = BoxKick(p1, p2, mg);
   var g2 = DodgeGame(p1, p2, mg);
   var g3 = Catch(p1, p2, mg);
-  tempList.push(g3);
-  tempList.push(g2);
-  tempList.push(g1);
+
+  for(var i = 0; i < mg.numOfGames; i++){
+    var rand = Math.floor(Math.random() * 3) + 1;
+
+    if(rand == 1){
+      tempList.push(g1);
+    } else if(rand == 2){
+      tempList.push(g2);
+    } else if(rand == 3){
+      tempList.push(g3);
+    }
+
+  }
 
   p1.metaGame = mg;
   p2.metaGame = mg;
