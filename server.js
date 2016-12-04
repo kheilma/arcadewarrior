@@ -68,6 +68,13 @@ var MetaGame = function(p1, p2){
   // If the score is >= 2 (for 3 total minigames)
   // End the match
   self.endMatch = function(player){
+          User.find({ "email": "adsdsasadadsad" }, function(err, user) {
+      if (err) throw err;
+
+  // object of the user
+      console.log(user);
+      console.log("test");
+    });
     var p1 = SOCKET_LIST[self.player1.id];
     var p2 = SOCKET_LIST[self.player2.id];
 

@@ -4,6 +4,7 @@ module.exports = function(app, passport) {
 		res.render('index.ejs', {
 			user: req.user
 		}); 
+		app.locals.email = req.user.email;
 	});
 
 
