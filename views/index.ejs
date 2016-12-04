@@ -63,11 +63,23 @@
   boxKickBG.src = "imgs/bkbg.png";
 
   //For dodgeThis
-  var thingToDodge = new Image();
-  thingToDodge.src = "imgs/thingToDodge.png";
+  //var thingToDodge = new Image();
+  //thingToDodge.src = "imgs/thingToDodge.png";
 
   var thingToDodgeBG = new Image();
   thingToDodgeBG.src = "imgs/thingToDodgeBG.png";
+
+  var thing1 = new Image();
+  thing1.src = "imgs/thing1.png";
+
+  var thing2 = new Image();
+  thing2.src = "imgs/thing2.png";
+
+  var thing3 = new Image();
+  thing3.src = "imgs/thing3.png";
+
+  var thing4 = new Image();
+  thing4.src = "imgs/thing4.png";
 
   //For Catch
   var catchItem = new Image();
@@ -222,7 +234,19 @@
       // No need to draw the Opponent's things to dodge
       //thingsToDodge = thisClient.dodgeArray;
       for(var i = 0; i < thingsToDodge.length; i++){
-        ctx.drawImage(thingToDodge,thingsToDodge[i].x,thingsToDodge[i].y);
+
+        thingImg = thingsToDodge[i].image;
+
+        if(thingImg == "1"){
+          ctx.drawImage(thing1,thingsToDodge[i].x,thingsToDodge[i].y);
+        } else if(thingImg == "2"){
+          ctx.drawImage(thing2,thingsToDodge[i].x,thingsToDodge[i].y);
+        } else if(thingImg == "3"){
+          ctx.drawImage(thing3,thingsToDodge[i].x,thingsToDodge[i].y);
+        } else if(thingImg == "4"){
+          ctx.drawImage(thing4,thingsToDodge[i].x,thingsToDodge[i].y);
+        }
+
       }
       
     }

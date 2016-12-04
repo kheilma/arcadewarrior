@@ -182,10 +182,10 @@ var BoxKick = function(p1, p2, metaGame){
 
     // Init player positions
     self.player1.x = 36;
-    self.player1.y = 500;
+    self.player1.y = 536;
 
     self.player2.x = 700;
-    self.player2.y = 500;
+    self.player2.y = 536;
 
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
@@ -246,7 +246,7 @@ var Catch = function(p1, p2, metaGame){
       self.catchArray[i].y += self.catchArray[i].spdY;
 
       // Check boundaries on each item
-      if(self.catchArray[i].y>=500){
+      if(self.catchArray[i].y>=536){
         self.catchArray.splice(i, 1);
       }
 
@@ -334,10 +334,10 @@ var Catch = function(p1, p2, metaGame){
 
     // Init player positions
     self.player1.x = 336;
-    self.player1.y = 500;
+    self.player1.y = 536;
 
     self.player2.x = 400;
-    self.player2.y = 500;
+    self.player2.y = 536;
 
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
@@ -414,6 +414,26 @@ var DodgeGame = function(p1, p2, metaGame){
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
       var thing = entity();
+      thing.image = "";
+
+      var chooseImage = self.genRandomPos(1,4);
+
+      if(chooseImage == 1){
+
+        thing.image = "1"; 
+
+      } else if(chooseImage == 2){
+
+        thing.image = "2";
+
+      } else if(chooseImage == 3){
+
+        thing.image = "3"; 
+
+      } else {
+
+        thing.image = "4"; 
+      }
 
       // Choose which positions they use as well as speeds based on position
       var decide = Math.floor((Math.random() * 8) + 1);
@@ -699,8 +719,8 @@ var Player = function(id){
       }
 
       // stop players from falling through the floor
-      if((self.y + self.spdY >= 500)){
-        self.y = 500;
+      if((self.y + self.spdY >= 536)){
+        self.y = 536;
         self.spdY=0;
         self.x+=self.spdX;
         self.spdX=0;
@@ -710,13 +730,13 @@ var Player = function(id){
 
       // If above the boundary, and they are not kicking, apply gravity
       // And stop them from being able to jump
-      if(self.y < 500 && self.kicking == false){
+      if(self.y < 536 && self.kicking == false){
         self.spdY+=grav;
         self.jumping = true;
       // If they are above the boundary, and are kicking, don't apply gravity
-      } else if(self.y < 500 && self.kicking == true){
+      } else if(self.y < 536 && self.kicking == true){
         self.jumping = true;
-      } else if(self.y==500){
+      } else if(self.y==536){
         self.jumping = false;
       }
 
