@@ -824,7 +824,7 @@ handleCollisions = function(player1, player2){
   } else if(player1.game.type == "Dodge This" || player2.game.type == "Dodge This"){
 
     // Player1 was hit
-    /*if(hitDetect(player1,player2) == "p1"){
+    if(hitDetect(player1,player2) == "p1"){
       player1.pause = true;
       player2.pause = true;
 
@@ -847,7 +847,7 @@ handleCollisions = function(player1, player2){
       player2.currGameNum++;
       setTimeout(function() {player1.game.finish(player1.gameList[player1.currGameNum]);}, 3000);
       //setTimeout(function() {player2.game.finish(player2.gameList[player2.currGameNum]);}, 3000);
-    }*/
+    }
 
   }
 
