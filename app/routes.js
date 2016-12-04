@@ -3,8 +3,12 @@ module.exports = function(app, passport) {
 	app.get('/', isLoggedIn, function(req, res) {
 		res.render('index.ejs', {
 			user: req.user
+<<<<<<< HEAD
 		}); 
 		app.locals.email = req.user.email;
+=======
+		});
+>>>>>>> eff784ab7ed274aaf80bf9063b7626bb857ebff1
 	});
 
 
