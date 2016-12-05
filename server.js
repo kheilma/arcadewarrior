@@ -1073,16 +1073,18 @@ setInterval(function(){
 
         // Not ready.
         //console.log(room + " has players that are not ready.");
-        setTimeout(function() {player1.kickTimer++;}, 1000);
-        setTimeout(function() {player2.kickTimer++;}, 1000);
+        setInterval(function() {player1.kickTimer++;}, 1000);
+        setInterval(function() {player2.kickTimer++;}, 1000);
         p1Socket.emit('waiting', {p1:player1.ready, p2:player2.ready});
         p2Socket.emit('waiting', {p1:player2.ready, p2:player1.ready});
 
-        if(player1.kickTimer >= 30 && player1.ready==false){
+        if(player1.kickTimer >= 6000 && player1.ready==false){
+          p1Socket.emit('afk');
           p1Socket.disconnect();
         }
 
-        if(player2.kickTimer >= 30 && player2.ready==false){
+        if(player2.kickTimer >= 6000 && player2.ready==false){
+          p2Socket.emit('afk');
           p2Socket.disconnect();
         }
 
