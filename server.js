@@ -140,7 +140,8 @@ var BoxKick = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "BoxKick";
-  self.instructions = "Press W to jump, S to kick down.";
+  self.instructions = "Press W to jump, S to kick down. \
+  Be above your opponent when you meet!";
   self.time = 30;
 
   self.winner = "none";
@@ -224,7 +225,9 @@ var Catch = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "Catch";
-  self.instructions = "Use AD to move left and right. Catch to win!";
+  self.instructions = "Use AD to move left and right. \
+  Press W to jump slightly \
+  Catch to win!";
 
   self.winner = "none";
 
@@ -255,7 +258,7 @@ var Catch = function(p1, p2, metaGame){
   }
 
   self.initializeCatchArray = function(){
-    var numOfThings = 3;
+    var numOfThings = 2;
 
     // For each thing to catch
     for(var i = 0; i < numOfThings; i++){
@@ -318,6 +321,8 @@ var Catch = function(p1, p2, metaGame){
     self.player2.instructing = true;
 
     //Reset inputs
+    self.player1.catchNum = 0;
+    self.player2.catchNum = 0;
     self.player1.pressingDown = false;
     self.player1.pressingUp= false;
     self.player1.pressingLeft = false;
@@ -335,10 +340,10 @@ var Catch = function(p1, p2, metaGame){
 
     // Init player positions
     self.player1.x = 336;
-    self.player1.y = 536;
+    self.player1.y = 472;
 
     self.player2.x = 400;
-    self.player2.y = 536;
+    self.player2.y = 472;
 
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
@@ -650,6 +655,7 @@ var Player = function(id){
   // Catch
   self.catchArray = [];
   self.catchNum = 0;
+  self.canJump = true;
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -751,7 +757,10 @@ var Player = function(id){
         self.spdX = 0;
       }
 
+      // CATCH GAME
     } else if(self.game.type=="Catch"){
+      var grav = 1.2;
+
       // right and left
       if(self.pressingRight){
         self.spdX = self.maxSpeed;
@@ -759,6 +768,33 @@ var Player = function(id){
         self.spdX = -self.maxSpeed;
       } else {
         self.spdX = 0;
+      }
+
+      // up and down
+      if(self.pressingUp && self.jumping == false && self.canJump==true){
+        self.spdY = -8;
+        self.jumping = true;
+        self.canJump = false;
+        setTimeout(function() {self.canJump=true}, 2000);
+      }
+
+      // stop players from falling through the floor
+      if((self.y + self.spdY >= 472)){
+        self.y = 472;
+        self.spdY=0;
+        self.x+=self.spdX;
+        self.spdX=0;
+      }
+
+      // Primitive way of gravity
+
+      // If above the boundary, and they are not kicking, apply gravity
+      // And stop them from being able to jump
+      if(self.y < 472){
+        self.spdY+=grav;
+        self.jumping = true;
+      } else if(self.y==472){
+        self.jumping = false;
       }
 
       if(self.x>=800-64){
@@ -1212,15 +1248,19 @@ hitDetect = function(player1, player2){
     return undefined;
   } else if(player1.game.type == "Catch" || player2.game.type == "Catch"){
     var catchArray = player1.game.catchArray;
+    p1x = player1.x+64;
+    p1y = player1.y+64;
+    p2x = player2.x+64;
+    p2y = player2.y+64;
 
     for(var i = 0; i < catchArray.length; i++){
       var itemX = catchArray[i].x+16;
       var itemY = catchArray[i].y+16;
       
-      if(p1x+32 >= itemX-16 && p1x-32 <= itemX+16 && p1y+32 >= itemY-16 && p1y-32 <= itemY+16){
+      if(p1x+32 >= itemX-16 && p1x-32 <= itemX+16 && p1y+64 >= itemY-16 && p1y-64 <= itemY+16){
         catchArray.splice(i,1);
         return "p1";
-      } else if(p2x+32 >= itemX-16 && p2x-32 <= itemX+16 && p2y+32 >= itemY-16 && p2y-32 <= itemY+16){
+      } else if(p2x+32 >= itemX-16 && p2x-32 <= itemX+16 && p2y+64 >= itemY-16 && p2y-64 <= itemY+16){
         catchArray.splice(i,1);
         return "p2";
       }

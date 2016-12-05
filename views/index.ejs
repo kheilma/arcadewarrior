@@ -82,9 +82,6 @@
   thing4.src = "imgs/thing4.png";
 
   //For Catch
-  var catchItem = new Image();
-  catchItem.src = "imgs/catchItem.png";
-
   var catchBG = new Image();
   catchBG.src = "imgs/catchBG.png";
 
@@ -173,14 +170,14 @@
       for(var i = 0; i < data.length; i++){
         var img = new Image();
         if(data[i].uniqueId === uniqueId){
-          img.src = "imgs/p1.png";
+          img.src = "imgs/pcatch1.png";
           catchArray = data[i].catchArray;
         } else {
-          img.src = "imgs/p2.png";
+          img.src = "imgs/pcatch2.png";
         }
         // Draw image
         ctx.drawImage(img,data[i].x,data[i].y);
-        ctx.fillText(data[i].catchNum.toString(), data[i].x+30, data[i].y+90);
+        ctx.fillText(data[i].catchNum.toString(), data[i].x+24, data[i].y+38);
       }
 
       // Draw the clients things to catch
