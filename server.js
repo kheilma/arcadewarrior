@@ -412,7 +412,7 @@ var DodgeGame = function(p1, p2, metaGame){
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 6;
+    var numOfThings = 4;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
@@ -518,7 +518,7 @@ var DodgeGame = function(p1, p2, metaGame){
 
     self.thingsToDodge = [];
     // Init array of things to dodge
-    setInterval(function() {self.initializeThingsToDodge();}, 1000);
+    setInterval(function() {self.initializeThingsToDodge();}, 2000);
     self.player1.thingsToDodge = self.thingsToDodge;
     self.player2.thingsToDodge = self.thingsToDodge;
 
@@ -631,6 +631,7 @@ var Player = function(id){
   self.room = "no room";
   self.ready = false;
   self.uniqueId = -1;
+  self.kickTimer = 0;
 
   self.metaGame = undefined;
   self.gameList = [];
@@ -1074,7 +1075,6 @@ setInterval(function(){
         //console.log(room + " has players that are not ready.");
         p1Socket.emit('waiting', {p1:player1.ready, p2:player2.ready});
         p2Socket.emit('waiting', {p1:player2.ready, p2:player1.ready});
-
       }
 
       // Closes socketIDs if statement
