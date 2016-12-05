@@ -80,7 +80,7 @@ module.exports = function(passport) {
             if (!user.validPassword(password))
                 return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
             //console.log("he");
-            //console.log(user);        
+            //console.log(user);
             return done(null, user);
         });
         User.findOne({ 'local.email' : 't' }, function(err, user1) {

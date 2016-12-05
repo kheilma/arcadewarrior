@@ -32,10 +32,7 @@
     </div>
     </div>
     </div>
-    <p id = 'txt'>
-      Welcome
-      
-      </p>
+    <p id = 'txt'><%=user.local.email%></p>
     <button type = "button" id = "Playbutton" onClick = "mySocketLoad()">Play Now </button>
 </body>
 </html>
@@ -143,7 +140,10 @@
     ctx.clearRect(0,0,800,600);
     var message = data.winner + " won the entire match!";
     if (data.winner == "You") {
-      socket.emit('ivewon');
+      var htmlwinner = document.getElementById("txt").innerHTML;
+      console.log(htmlwinner);
+      //console.log(htmlwinner);
+      socket.emit('ivewon', {winner:htmlwinner});
     }
     ctx.fillText(message,200,300);
     socket.disconnect();

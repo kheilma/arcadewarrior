@@ -12,7 +12,7 @@ var LocalStrategy   = require('passport-local').Strategy;
 var User       		= require('./app/models/user');
 
 
-//mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
+mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
 
 
 
@@ -412,7 +412,7 @@ var DodgeGame = function(p1, p2, metaGame){
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 8;
+    var numOfThings = 6;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
@@ -518,7 +518,7 @@ var DodgeGame = function(p1, p2, metaGame){
 
     self.thingsToDodge = [];
     // Init array of things to dodge
-    setInterval(function() {self.initializeThingsToDodge();}, 5000);
+    setInterval(function() {self.initializeThingsToDodge();}, 1000);
     self.player1.thingsToDodge = self.thingsToDodge;
     self.player2.thingsToDodge = self.thingsToDodge;
 
@@ -631,6 +631,7 @@ var Player = function(id){
   self.room = "no room";
   self.ready = false;
   self.uniqueId = -1;
+  self.kickTimer = 0;
 
   self.metaGame = undefined;
   self.gameList = [];
@@ -769,10 +770,10 @@ var Player = function(id){
 
       // up and down
       if(self.pressingUp && self.jumping == false && self.canJump==true){
-        self.spdY = -8;
+        self.spdY = -12;
         self.jumping = true;
         self.canJump = false;
-        setTimeout(function() {self.canJump=true}, 2000);
+        setTimeout(function() {self.canJump=true}, 1000);
       }
 
       // stop players from falling through the floor
@@ -929,16 +930,25 @@ io.sockets.on('connection', function(socket){
 
   Player.onConnect(socket);
 
-      socket.on('ivewon', function(){
-          User.findOne({ 'local.email' : 'hehe' }, function(err, user) {
+      socket.on('ivewon', function(data){
+         var temp = data.winner;
+         var temp1 = 'hehe';
+         console.log(temp.length);
+         console.log(temp1.length);
+         console.log(temp);
+          User.findOne({ 'local.email' : temp }, function(err, user) {
       if (err) throw err;
 
   // object of the user
       //console.log(app.locals.email);
       //console.log("test");
+      console.log(temp1);
       console.log(user);
-      user.userWins = 2;
+      
+      user.local.userWins = user.local.userWins + 1;
         user.save(function(err) {
+          if (err)
+            throw err;
                 });
     });
       //user.userWins = 2;
@@ -1063,8 +1073,18 @@ setInterval(function(){
 
         // Not ready.
         //console.log(room + " has players that are not ready.");
+        setTimeout(function() {player1.kickTimer++;}, 1000);
+        setTimeout(function() {player2.kickTimer++;}, 1000);
         p1Socket.emit('waiting', {p1:player1.ready, p2:player2.ready});
         p2Socket.emit('waiting', {p1:player2.ready, p2:player1.ready});
+
+        if(player1.kickTimer >= 30 && player1.ready==false){
+          p1Socket.disconnect();
+        }
+
+        if(player2.kickTimer >= 30 && player2.ready==false){
+          p2Socket.disconnect();
+        }
 
       }
 
@@ -1236,9 +1256,9 @@ hitDetect = function(player1, player2){
       var boxX = thingsToDodge[i].x+16;
       var boxY = thingsToDodge[i].y+16;
       
-      if(p1x+32 >= boxX-16 && p1x-32 <= boxX+16 && p1y+32 >= boxY-16 && p1y-32 <= boxY+16){
+      if(p1x+20 >= boxX-16 && p1x-20 <= boxX+16 && p1y+32 >= boxY-16 && p1y-32 <= boxY+16){
         return "p1";
-      } else if(p2x+32 >= boxX-16 && p2x-32 <= boxX+16 && p2y+32 >= boxY-16 && p2y-32 <= boxY+16){
+      } else if(p2x+20 >= boxX-16 && p2x-20 <= boxX+16 && p2y+32 >= boxY-16 && p2y-32 <= boxY+16){
         return "p2";
       }
 
