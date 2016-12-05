@@ -57,21 +57,42 @@
 
   // For boxkick
   var boxKickBG = new Image();
-  boxKickBG.src = "bkbg.png";
+  boxKickBG.src = "imgs/bkbg.png";
 
   //For dodgeThis
-  var thingToDodge = new Image();
-  thingToDodge.src = "thingToDodge.png";
+  //var thingToDodge = new Image();
+  //thingToDodge.src = "imgs/thingToDodge.png";
 
   var thingToDodgeBG = new Image();
-  thingToDodgeBG.src = "thingToDodgeBG.png";
+  thingToDodgeBG.src = "imgs/thingToDodgeBG.png";
+
+  var thing1 = new Image();
+  thing1.src = "imgs/thing1.png";
+
+  var thing2 = new Image();
+  thing2.src = "imgs/thing2.png";
+
+  var thing3 = new Image();
+  thing3.src = "imgs/thing3.png";
+
+  var thing4 = new Image();
+  thing4.src = "imgs/thing4.png";
 
   //For Catch
-  var catchItem = new Image();
-  catchItem.src = "catchItem.png";
-
   var catchBG = new Image();
-  catchBG.src = "catchBG.png";
+  catchBG.src = "imgs/catchBG.png";
+
+  var catchApple = new Image();
+  catchApple.src = "imgs/apple.png";
+
+  var catchCherry = new Image();
+  catchCherry.src = "imgs/cherry.png";
+
+  var catchWatermelon = new Image();
+  catchWatermelon.src = "imgs/watermelon.png";
+
+  var catchCupcake = new Image();
+  catchCupcake.src = "imgs/cupcake.png";
 
   // Update game type
   socket.on('gameType', function(data){
@@ -80,8 +101,12 @@
 
   socket.on('instructions', function(data){
     ctx.clearRect(0,0,800,600);
-    ctx.fillText("Game: " + data.type,130,50);
-    ctx.fillText(data.message,130,100);
+    ctx.fillText("Game: " + data.type,20,50);
+    for(var i = 0; i < data.message.length; i++){
+      ctx.fillText(data.message[i],20,100+(i*50));
+    }
+    //ctx.fillText(data.message[0],20,100);
+    setTimeout(function() {socket.emit('doneInstructing')}, 3000);
   });
 
   socket.emit('id', {id:uniqueId});
@@ -149,20 +174,31 @@
       for(var i = 0; i < data.length; i++){
         var img = new Image();
         if(data[i].uniqueId === uniqueId){
-          img.src = "p1.png";
+          img.src = "imgs/pcatch1.png";
           catchArray = data[i].catchArray;
         } else {
-          img.src = "p2.png";
+          img.src = "imgs/pcatch2.png";
         }
         // Draw image
         ctx.drawImage(img,data[i].x,data[i].y);
-        ctx.fillText(data[i].catchNum.toString(), data[i].x+30, data[i].y+90);
+        ctx.fillText(data[i].catchNum.toString(), data[i].x+24, data[i].y+38);
       }
 
       // Draw the clients things to catch
       // No need to draw the Opponent's things to catch
       for(var i = 0; i < catchArray.length; i++){
-        ctx.drawImage(catchItem,catchArray[i].x,catchArray[i].y);
+        catchImg = catchArray[i].image;
+
+        if(catchImg == "apple"){
+          ctx.drawImage(catchApple,catchArray[i].x,catchArray[i].y);
+        } else if(catchImg == "cherry"){
+          ctx.drawImage(catchCherry,catchArray[i].x,catchArray[i].y);
+        } else if(catchImg == "watermelon"){
+          ctx.drawImage(catchWatermelon,catchArray[i].x,catchArray[i].y);
+        } else if(catchImg == "cupcake"){
+          ctx.drawImage(catchCupcake,catchArray[i].x,catchArray[i].y);
+        }
+        
       }
 
     } else if(game == "BoxKick"){
@@ -171,9 +207,9 @@
       for(var i = 0; i < data.length; i++){
         var img = new Image();
         if(data[i].uniqueId === uniqueId){
-          img.src = "p1.png";
+          img.src = "imgs/p1.png";
         } else {
-          img.src = "p2.png";
+          img.src = "imgs/p2.png";
         }
         // Draw image
         ctx.drawImage(img,data[i].x,data[i].y);
@@ -186,10 +222,10 @@
       for(var i = 0; i < data.length; i++){
         var img = new Image();
         if(data[i].uniqueId === uniqueId){
-          img.src = "p1.png";
+          img.src = "imgs/p1.png";
           thingsToDodge = data[i].dodgeArray;
         } else {
-          img.src = "p2.png";
+          img.src = "imgs/p2.png";
         }
         // Draw image
         ctx.drawImage(img,data[i].x,data[i].y);
@@ -199,7 +235,19 @@
       // No need to draw the Opponent's things to dodge
       //thingsToDodge = thisClient.dodgeArray;
       for(var i = 0; i < thingsToDodge.length; i++){
-        ctx.drawImage(thingToDodge,thingsToDodge[i].x,thingsToDodge[i].y);
+
+        thingImg = thingsToDodge[i].image;
+
+        if(thingImg == "1"){
+          ctx.drawImage(thing1,thingsToDodge[i].x,thingsToDodge[i].y);
+        } else if(thingImg == "2"){
+          ctx.drawImage(thing2,thingsToDodge[i].x,thingsToDodge[i].y);
+        } else if(thingImg == "3"){
+          ctx.drawImage(thing3,thingsToDodge[i].x,thingsToDodge[i].y);
+        } else if(thingImg == "4"){
+          ctx.drawImage(thing4,thingsToDodge[i].x,thingsToDodge[i].y);
+        }
+
       }
       
     }

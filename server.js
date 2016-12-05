@@ -140,7 +140,7 @@ var BoxKick = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "BoxKick";
-  self.instructions = "Press W to jump, S to kick down.";
+  self.instructions = ["Press W to jump, S to kick down.", " Be above your opponent when you meet!"];
   self.time = 30;
 
   self.winner = "none";
@@ -182,10 +182,10 @@ var BoxKick = function(p1, p2, metaGame){
 
     // Init player positions
     self.player1.x = 36;
-    self.player1.y = 500;
+    self.player1.y = 536;
 
     self.player2.x = 700;
-    self.player2.y = 500;
+    self.player2.y = 536;
 
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
@@ -224,7 +224,7 @@ var Catch = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "Catch";
-  self.instructions = "Use AD to move left and right. Catch to win!";
+  self.instructions = ["Use AD to move left and right.", "Press W to jump slightly, but only every so often.", "Catch to win!"];
 
   self.winner = "none";
 
@@ -246,7 +246,7 @@ var Catch = function(p1, p2, metaGame){
       self.catchArray[i].y += self.catchArray[i].spdY;
 
       // Check boundaries on each item
-      if(self.catchArray[i].y>=500){
+      if(self.catchArray[i].y>=570){
         self.catchArray.splice(i, 1);
       }
 
@@ -255,17 +255,37 @@ var Catch = function(p1, p2, metaGame){
   }
 
   self.initializeCatchArray = function(){
-    var numOfThings = 3;
+    var numOfThings = 2;
 
     // For each thing to catch
     for(var i = 0; i < numOfThings; i++){
       var catchItem = entity();
+      catchItem.image = "";
 
-        catchItem.x = self.genRandomPos(50,750); 
-        catchItem.y = -100;
+      var chooseImage = self.genRandomPos(1,4);
 
-        catchItem.spdX =  0; 
-        catchItem.spdY = self.genRandom(0.5,2); 
+      if(chooseImage == 1){
+
+        catchItem.image = "apple"; 
+
+      } else if(chooseImage == 2){
+
+        catchItem.image = "cherry";
+
+      } else if(chooseImage == 3){
+
+        catchItem.image = "watermelon"; 
+
+      } else {
+
+        catchItem.image = "cupcake"; 
+      }
+
+      catchItem.x = self.genRandomPos(50,750); 
+      catchItem.y = -100;
+
+      catchItem.spdX =  0; 
+      catchItem.spdY = self.genRandom(0.5,2); 
 
       // After everything is generated for the individual item, we push it to the array
       self.catchArray.push(catchItem);
@@ -282,6 +302,7 @@ var Catch = function(p1, p2, metaGame){
       return;
     }
 
+    self.catchArray = [];
     // Init array of things to dodge
     setInterval(function() {self.initializeCatchArray();}, 3000);
     self.player1.catchArray = self.catchArray;
@@ -297,6 +318,8 @@ var Catch = function(p1, p2, metaGame){
     self.player2.instructing = true;
 
     //Reset inputs
+    self.player1.catchNum = 0;
+    self.player2.catchNum = 0;
     self.player1.pressingDown = false;
     self.player1.pressingUp= false;
     self.player1.pressingLeft = false;
@@ -314,10 +337,10 @@ var Catch = function(p1, p2, metaGame){
 
     // Init player positions
     self.player1.x = 336;
-    self.player1.y = 500;
+    self.player1.y = 472;
 
     self.player2.x = 400;
-    self.player2.y = 500;
+    self.player2.y = 472;
 
     // Tell client what game type to draw
     p1Socket.emit('instructions', {message:self.instructions, type:self.type});
@@ -356,7 +379,7 @@ var DodgeGame = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "Dodge This";
-  self.instructions = "Use WSAD to move around and dodge";
+  self.instructions = ["Use WSAD to move around and dodge"];
 
   self.winner = "none";
 
@@ -394,6 +417,26 @@ var DodgeGame = function(p1, p2, metaGame){
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
       var thing = entity();
+      thing.image = "";
+
+      var chooseImage = self.genRandomPos(1,4);
+
+      if(chooseImage == 1){
+
+        thing.image = "1"; 
+
+      } else if(chooseImage == 2){
+
+        thing.image = "2";
+
+      } else if(chooseImage == 3){
+
+        thing.image = "3"; 
+
+      } else {
+
+        thing.image = "4"; 
+      }
 
       // Choose which positions they use as well as speeds based on position
       var decide = Math.floor((Math.random() * 8) + 1);
@@ -473,6 +516,7 @@ var DodgeGame = function(p1, p2, metaGame){
     self.player1.game = self;
     self.player2.game = self;
 
+    self.thingsToDodge = [];
     // Init array of things to dodge
     setInterval(function() {self.initializeThingsToDodge();}, 5000);
     self.player1.thingsToDodge = self.thingsToDodge;
@@ -608,6 +652,7 @@ var Player = function(id){
   // Catch
   self.catchArray = [];
   self.catchNum = 0;
+  self.canJump = true;
 
   // overwrite super update by including updateSpd
   var super_update = self.update;
@@ -679,8 +724,8 @@ var Player = function(id){
       }
 
       // stop players from falling through the floor
-      if((self.y + self.spdY >= 500)){
-        self.y = 500;
+      if((self.y + self.spdY >= 536)){
+        self.y = 536;
         self.spdY=0;
         self.x+=self.spdX;
         self.spdX=0;
@@ -690,13 +735,13 @@ var Player = function(id){
 
       // If above the boundary, and they are not kicking, apply gravity
       // And stop them from being able to jump
-      if(self.y < 500 && self.kicking == false){
+      if(self.y < 536 && self.kicking == false){
         self.spdY+=grav;
         self.jumping = true;
       // If they are above the boundary, and are kicking, don't apply gravity
-      } else if(self.y < 500 && self.kicking == true){
+      } else if(self.y < 536 && self.kicking == true){
         self.jumping = true;
-      } else if(self.y==500){
+      } else if(self.y==536){
         self.jumping = false;
       }
 
@@ -709,7 +754,10 @@ var Player = function(id){
         self.spdX = 0;
       }
 
+      // CATCH GAME
     } else if(self.game.type=="Catch"){
+      var grav = 1.2;
+
       // right and left
       if(self.pressingRight){
         self.spdX = self.maxSpeed;
@@ -717,6 +765,33 @@ var Player = function(id){
         self.spdX = -self.maxSpeed;
       } else {
         self.spdX = 0;
+      }
+
+      // up and down
+      if(self.pressingUp && self.jumping == false && self.canJump==true){
+        self.spdY = -8;
+        self.jumping = true;
+        self.canJump = false;
+        setTimeout(function() {self.canJump=true}, 2000);
+      }
+
+      // stop players from falling through the floor
+      if((self.y + self.spdY >= 472)){
+        self.y = 472;
+        self.spdY=0;
+        self.x+=self.spdX;
+        self.spdX=0;
+      }
+
+      // Primitive way of gravity
+
+      // If above the boundary, and they are not kicking, apply gravity
+      // And stop them from being able to jump
+      if(self.y < 472){
+        self.spdY+=grav;
+        self.jumping = true;
+      } else if(self.y==472){
+        self.jumping = false;
       }
 
       if(self.x>=800-64){
@@ -837,6 +912,10 @@ io.sockets.on('connection', function(socket){
 
     //console.log("From client: " + message);
 
+  });
+
+  socket.on('doneInstructing', function(){
+    player.instructing = false;
   });
 
   queue.push(player);
@@ -986,8 +1065,6 @@ setInterval(function(){
 
         } else {
           // Instructing!
-          setTimeout(function() {player1.instructing = false;}, 5000);
-          setTimeout(function() {player2.instructing = false;}, 5000);
 
         }
 
@@ -1179,15 +1256,19 @@ hitDetect = function(player1, player2){
     return undefined;
   } else if(player1.game.type == "Catch" || player2.game.type == "Catch"){
     var catchArray = player1.game.catchArray;
+    p1x = player1.x+64;
+    p1y = player1.y+64;
+    p2x = player2.x+64;
+    p2y = player2.y+64;
 
     for(var i = 0; i < catchArray.length; i++){
       var itemX = catchArray[i].x+16;
       var itemY = catchArray[i].y+16;
       
-      if(p1x+32 >= itemX-16 && p1x-32 <= itemX+16 && p1y+32 >= itemY-16 && p1y-32 <= itemY+16){
+      if(p1x+32 >= itemX-16 && p1x-32 <= itemX+16 && p1y+64 >= itemY-16 && p1y-64 <= itemY+16){
         catchArray.splice(i,1);
         return "p1";
-      } else if(p2x+32 >= itemX-16 && p2x-32 <= itemX+16 && p2y+32 >= itemY-16 && p2y-32 <= itemY+16){
+      } else if(p2x+32 >= itemX-16 && p2x-32 <= itemX+16 && p2y+64 >= itemY-16 && p2y-64 <= itemY+16){
         catchArray.splice(i,1);
         return "p2";
       }
