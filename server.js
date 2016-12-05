@@ -631,6 +631,7 @@ var Player = function(id){
   self.room = "no room";
   self.ready = false;
   self.uniqueId = -1;
+  self.kickTimer = 0;
 
   self.metaGame = undefined;
   self.gameList = [];
@@ -1072,8 +1073,18 @@ setInterval(function(){
 
         // Not ready.
         //console.log(room + " has players that are not ready.");
+        setTimeout(function() {player1.kickTimer++;}, 1000);
+        setTimeout(function() {player2.kickTimer++;}, 1000);
         p1Socket.emit('waiting', {p1:player1.ready, p2:player2.ready});
         p2Socket.emit('waiting', {p1:player2.ready, p2:player1.ready});
+
+        if(player1.kickTimer >= 30 && player1.ready==false){
+          p1Socket.disconnect();
+        }
+
+        if(player2.kickTimer >= 30 && player2.ready==false){
+          p2Socket.disconnect();
+        }
 
       }
 
