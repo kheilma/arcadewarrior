@@ -1075,8 +1075,6 @@ setInterval(function(){
 
         // Not ready.
         //console.log(room + " has players that are not ready.");
-        setInterval(function() {player1.kickTimer++;}, 1000);
-        setInterval(function() {player2.kickTimer++;}, 1000);
         p1Socket.emit('waiting', {p1:player1.ready, p2:player2.ready});
         p2Socket.emit('waiting', {p1:player2.ready, p2:player1.ready});
 
@@ -1087,7 +1085,6 @@ setInterval(function(){
         if(player2.kickTimer >= 6000 && player2.ready==false){
           p2Socket.emit('afk');
         }
-
       }
 
       // Closes socketIDs if statement
