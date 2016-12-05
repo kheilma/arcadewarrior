@@ -140,8 +140,7 @@ var BoxKick = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "BoxKick";
-  self.instructions = "Press W to jump, S to kick down. \
-  Be above your opponent when you meet!";
+  self.instructions = ["Press W to jump, S to kick down.", " Be above your opponent when you meet!"];
   self.time = 30;
 
   self.winner = "none";
@@ -225,9 +224,7 @@ var Catch = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "Catch";
-  self.instructions = "Use AD to move left and right. \
-  Press W to jump slightly \
-  Catch to win!";
+  self.instructions = ["Use AD to move left and right.", "Press W to jump slightly, but only every so often.", "Catch to win!"];
 
   self.winner = "none";
 
@@ -382,7 +379,7 @@ var DodgeGame = function(p1, p2, metaGame){
   self.player1 = p1;
   self.player2 = p2;
   self.type = "Dodge This";
-  self.instructions = "Use WSAD to move around and dodge";
+  self.instructions = ["Use WSAD to move around and dodge"];
 
   self.winner = "none";
 
@@ -917,6 +914,10 @@ io.sockets.on('connection', function(socket){
 
   });
 
+  socket.on('doneInstructing', function(){
+    player.instructing = false;
+  });
+
   queue.push(player);
   //console.log("Queue size after connection: " + queue.length);
   socket.emit('queue');
@@ -1055,8 +1056,6 @@ setInterval(function(){
 
         } else {
           // Instructing!
-          setTimeout(function() {player1.instructing = false;}, 5000);
-          setTimeout(function() {player2.instructing = false;}, 5000);
 
         }
 

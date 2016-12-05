@@ -104,8 +104,12 @@
 
   socket.on('instructions', function(data){
     ctx.clearRect(0,0,800,600);
-    ctx.fillText("Game: " + data.type,130,50);
-    ctx.fillText(data.message,130,100);
+    ctx.fillText("Game: " + data.type,20,50);
+    for(var i = 0; i < data.message.length; i++){
+      ctx.fillText(data.message[i],20,100+(i*50));
+    }
+    //ctx.fillText(data.message[0],20,100);
+    setTimeout(function() {socket.emit('doneInstructing')}, 3000);
   });
 
   socket.emit('id', {id:uniqueId});
