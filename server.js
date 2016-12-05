@@ -668,16 +668,25 @@ io.sockets.on('connection', function(socket){
 
   Player.onConnect(socket);
 
-      socket.on('ivewon', function(){
-          User.findOne({ 'local.email' : 'hehe' }, function(err, user) {
+      socket.on('ivewon', function(data){
+         var temp = data.winner;
+         var temp1 = 'hehe';
+         console.log(temp.length);
+         console.log(temp1.length);
+         console.log(temp);
+          User.findOne({ 'local.email' : temp }, function(err, user) {
       if (err) throw err;
 
   // object of the user
       //console.log(app.locals.email);
       //console.log("test");
+      console.log(temp1);
       console.log(user);
-      user.userWins = 2;
+      
+      user.local.userWins = user.local.userWins + 1;
         user.save(function(err) {
+          if (err)
+            throw err;
                 });
     });
       //user.userWins = 2;
