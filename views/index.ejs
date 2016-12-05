@@ -32,7 +32,9 @@
     </div>
     </div>
     </div>
+    <!-- 
     <p id = 'txt'><%=user.local.email%></p>
+    !--> 
     <button type = "button" id = "Playbutton" onClick = "mySocketLoad()">Play Now </button>
 </body>
 </html>
@@ -99,6 +101,14 @@
     game = data.type;
   });
 
+  // Drawing related things
+  socket.on('afk', function(){
+
+    ctx.clearRect(0,0,800,600);
+    ctx.fillText("You were kicked due to inactivity.", 20, 100);
+
+  });
+
   socket.on('instructions', function(data){
     ctx.clearRect(0,0,800,600);
     ctx.fillText("Game: " + data.type,20,50);
@@ -135,7 +145,7 @@
     }
     
   });
-  // Drawing related things
+  
   socket.on('endMatch', function(data){
     ctx.clearRect(0,0,800,600);
     var message = data.winner + " won the entire match!";
