@@ -412,7 +412,7 @@ var DodgeGame = function(p1, p2, metaGame){
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 8;
+    var numOfThings = 4;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
@@ -518,7 +518,7 @@ var DodgeGame = function(p1, p2, metaGame){
 
     self.thingsToDodge = [];
     // Init array of things to dodge
-    setInterval(function() {self.initializeThingsToDodge();}, 5000);
+    setInterval(function() {self.initializeThingsToDodge();}, 2000);
     self.player1.thingsToDodge = self.thingsToDodge;
     self.player2.thingsToDodge = self.thingsToDodge;
 
@@ -769,10 +769,10 @@ var Player = function(id){
 
       // up and down
       if(self.pressingUp && self.jumping == false && self.canJump==true){
-        self.spdY = -8;
+        self.spdY = -12;
         self.jumping = true;
         self.canJump = false;
-        setTimeout(function() {self.canJump=true}, 2000);
+        setTimeout(function() {self.canJump=true}, 1000);
       }
 
       // stop players from falling through the floor
@@ -1245,9 +1245,9 @@ hitDetect = function(player1, player2){
       var boxX = thingsToDodge[i].x+16;
       var boxY = thingsToDodge[i].y+16;
       
-      if(p1x+32 >= boxX-16 && p1x-32 <= boxX+16 && p1y+32 >= boxY-16 && p1y-32 <= boxY+16){
+      if(p1x+20 >= boxX-16 && p1x-20 <= boxX+16 && p1y+32 >= boxY-16 && p1y-32 <= boxY+16){
         return "p1";
-      } else if(p2x+32 >= boxX-16 && p2x-32 <= boxX+16 && p2y+32 >= boxY-16 && p2y-32 <= boxY+16){
+      } else if(p2x+20 >= boxX-16 && p2x-20 <= boxX+16 && p2y+32 >= boxY-16 && p2y-32 <= boxY+16){
         return "p2";
       }
 
