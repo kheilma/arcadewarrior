@@ -12,7 +12,7 @@ var LocalStrategy   = require('passport-local').Strategy;
 var User       		= require('./app/models/user');
 
 
-mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
+//mongoose.connect('mongodb://80a9509e-caf7-4e6e-b44f-1e9ef40e21d0:ec588a90-de18-47ca-8d99-72c37d7e21b1@50.23.230.137:10329/db');
 
 
 
@@ -1080,12 +1080,10 @@ setInterval(function(){
 
         if(player1.kickTimer >= 6000 && player1.ready==false){
           p1Socket.emit('afk');
-          p1Socket.disconnect();
         }
 
         if(player2.kickTimer >= 6000 && player2.ready==false){
           p2Socket.emit('afk');
-          p2Socket.disconnect();
         }
 
       }
@@ -1100,7 +1098,7 @@ setInterval(function(){
       // If player1 undefined, send player2 the message that player1 left
       if(p1Socket == undefined){
         p2Socket.emit('playerLeft');
-      // Vice versa
+        // Vice versa
       } else {
         p1Socket.emit('playerLeft');
       }
