@@ -412,7 +412,7 @@ var DodgeGame = function(p1, p2, metaGame){
   }
 
   self.initializeThingsToDodge = function(){
-    var numOfThings = 4;
+    var numOfThings = 6;
 
     // For each thing to dodge
     for(var i = 0; i < numOfThings; i++){
@@ -518,7 +518,7 @@ var DodgeGame = function(p1, p2, metaGame){
 
     self.thingsToDodge = [];
     // Init array of things to dodge
-    setInterval(function() {self.initializeThingsToDodge();}, 2000);
+    setInterval(function() {self.initializeThingsToDodge();}, 1000);
     self.player1.thingsToDodge = self.thingsToDodge;
     self.player2.thingsToDodge = self.thingsToDodge;
 
