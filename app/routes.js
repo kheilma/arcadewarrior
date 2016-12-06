@@ -18,7 +18,7 @@ app.get('/', /*isLoggedIn,*/ function(req, res) {
 	});
 
 	app.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/profile', 
+		successRedirect : '/', 
 		failureRedirect : '/login', 
 		failureFlash : true 
 	}));
@@ -31,7 +31,7 @@ app.get('/', /*isLoggedIn,*/ function(req, res) {
 	});
 
 	app.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/profile', 
+		successRedirect : '/', 
 		failureRedirect : '/signup', 
 		failureFlash : true 
 	}));
