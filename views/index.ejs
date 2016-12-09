@@ -165,6 +165,9 @@
 
   socket.on('playerLeft', function(){
     ctx.fillText("Other player has left. Sorry.",100,500);
+      var htmlwinner = document.getElementById("txt").innerHTML;
+      //console.log(htmlwinner);
+      socket.emit('ivewon', {winner:htmlwinner});
     socket.disconnect();
     document.getElementById('Playbutton').add();
 
